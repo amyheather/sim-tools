@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Consistent identifier (represents all versions, resolves to latest): [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4553641.svg)](https://doi.org/10.5281/zenodo.4553641)
 
+## v1.1.1
+
+### Fixed
+
+* Add `NSPPThinning` to `DistributionRegistry`.
+
 ## v1.1.0
 
 Add support for nested dictionaries in `DistributionRegistry`.
