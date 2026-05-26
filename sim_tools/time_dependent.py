@@ -10,7 +10,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import itertools
 
+from sim_tools.distributions import DistributionRegistry
+
+
 # pylint: disable=too-few-public-methods
+@DistributionRegistry.register()
 class NSPPThinning:
     """
     Non Stationary Poisson Process via Thinning.
