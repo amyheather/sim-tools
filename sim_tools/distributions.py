@@ -2414,7 +2414,7 @@ class DiscreteEmpirical:
         """
         sample = self.rng.choice(self.values, p=self.probabilities, size=size)
         if size is None:
-            return sample.tolist()
+            return sample.item()
         return sample
 
 
