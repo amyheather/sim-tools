@@ -228,6 +228,28 @@ def test_discrete_uneven_probabilities():
 
 
 @pytest.mark.parametrize(
+    "values, expected_type",
+    [
+        (["C1", "C2", "C3"], str),
+        ([1, 2, 3], int),
+        ([1.0, 2.0, 3.0], float),
+    ],
+)
+@pytest.mark.parametrize(
+    "input_type",
+    [list, np.array, pd.Index, pd.Series],
+)
+def test_discrete_inputs(values, expected_type, input_type):
+    """Test DiscreteEmpirical works with different input types."""
+    dist = dists.DiscreteEmpirical(
+        values=input_type(values), freq=[0.2, 0.5, 0.3], random_seed=42
+    )
+    result = dist.sample()
+    assert isinstance(result, expected_type)
+    assert result in values
+
+
+@pytest.mark.parametrize(
     "n, lower_bound",
     [
         (1, 10.0),
