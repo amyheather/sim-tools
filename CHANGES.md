@@ -8,7 +8,11 @@ Consistent identifier (represents all versions, resolves to latest): [![DOI](htt
 
 ## v1.2.0
 
-Bug fixes for `DistributionRegistry` and `DiscreteEmpirical`.
+Bug fixes for `DistributionRegistry` and `DiscreteEmpirical`, and tests for `DistributionRegistry`.
+
+### Added
+
+* Add tests for `DistributionRegistry`.
 
 ### Fixed
 
