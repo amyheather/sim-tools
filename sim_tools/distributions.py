@@ -601,7 +601,12 @@ class DistributionRegistry:
 
         # Copy params and inject the random seed.
         params = dist_config["params"].copy()
-        params["random_seed"] = seed
+
+        # Only inject random seed if class constructor accepts it
+        distribution_class = cls.get(dist_config["class_name"])
+        sig = inspect.signature(distribution_class.__init__)
+        if "random_seed" in sig.parameters:
+            params["random_seed"] = seed
 
         # Instantiate and return the distribution object.
         return cls.create(dist_config["class_name"], **params)
