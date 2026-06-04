@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Consistent identifier (represents all versions, resolves to latest): [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4553641.svg)](https://doi.org/10.5281/zenodo.4553641)
 
+## v1.2.0
+
+Bug fixes for `DistributionRegistry` and `DiscreteEmpirical`, and tests for `DistributionRegistry`.
+
+### Added
+
+* Add tests for `DistributionRegistry`.
+
+### Fixed
+
+* Add `NSPPThinning` to `DistributionRegistry` (as it was missing).
+* `CombinationDistribution` now allows distributions to be be passed either as positional arguments (original behaviour) or via the `dists` keyword argument (new behaviour). This fixes it for `DistributionRegistry`, which requires keyword form for creating instances.
+* Amended random seed assignment in `DistributionRegistry`, which fixes it so it can now work with `TruncatedDistribution`, `CombinationDistribution`, `FixedDistribution` and `NSPPThinning` (as none of these require `random_seed`).
+* `DiscreteEmpirical` fixed to work with different inputs (as for index or series, it would fail to run `sample()` without a specified `size=` argument).
+
 ## v1.1.0
 
 Add support for nested dictionaries in `DistributionRegistry`.

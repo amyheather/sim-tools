@@ -601,7 +601,12 @@ class DistributionRegistry:
 
         # Copy params and inject the random seed.
         params = dist_config["params"].copy()
-        params["random_seed"] = seed
+
+        # Only inject random seed if class constructor accepts it
+        distribution_class = cls.get(dist_config["class_name"])
+        sig = inspect.signature(distribution_class.__init__)
+        if "random_seed" in sig.parameters:
+            params["random_seed"] = seed
 
         # Instantiate and return the distribution object.
         return cls.create(dist_config["class_name"], **params)
@@ -1230,18 +1235,32 @@ class CombinationDistribution:
     sample a combination of values from multiple distributions.
     """
 
-    def __init__(self, *dists: Distribution):
+    def __init__(self, *args: Distribution, dists=None):
         """
-        Initialize a combination distribution.
+        Initialise a combination distribution.
+
+        Distributions can be passed either as positional arguments or via the
+        `dists` keyword argument, but not both. The keyword form is required
+        when creating instances through the `DistributionRegistry` class,
+        which passes parameters by name.
 
         Parameters
         ----------
-        *dists : Sequence[Distribution]
-            Variable length sequence of Distribution objects to combine.
-            The sample method will return the sum of samples from all these
-            distributions.
+        *args : Distribution
+            Distribution objects to combine, passed as positional arguments.
+            E.g. `CombinationDistribution(d1, d2)`.
+            Cannot be used together with `dists`.
+        dists : Sequence[Distribution], optional
+            Distribution objects to combine, passed as a keyword argument.
+            E.g. `CombinationDistribution(dists=[d1, d2])`.
+            Cannot be used together with `*args`.
         """
-        self.dists = dists
+        if args and dists is not None:
+            raise ValueError(
+                "Pass distributions either as positional arguments or as "
+                "'dists', not both."
+            )
+        self.dists = dists if dists is not None else args
 
     def __repr__(self):
         dist_reprs = [repr(dist) for dist in self.dists]
@@ -2345,7 +2364,7 @@ class DiscreteEmpirical:
         """
 
         # convert to array first
-        self.values = np.asarray(values)
+        self.values = np.asarray(list(values))
         self.freq = np.asarray(freq)
 
         validate(self.freq, "freq", is_positive_array)
@@ -2394,7 +2413,6 @@ class DiscreteEmpirical:
             - A numpy array of values with shape determined by size parameter
         """
         sample = self.rng.choice(self.values, p=self.probabilities, size=size)
-
         if size is None:
             return sample.item()
         return sample

@@ -7,6 +7,7 @@ distribution implementations.
 """
 
 import numpy as np
+import pandas as pd
 import pytest
 
 import sim_tools.distributions as dists
@@ -227,6 +228,28 @@ def test_discrete_uneven_probabilities():
 
 
 @pytest.mark.parametrize(
+    "values, expected_type",
+    [
+        (["C1", "C2", "C3"], str),
+        ([1, 2, 3], int),
+        ([1.0, 2.0, 3.0], float),
+    ],
+)
+@pytest.mark.parametrize(
+    "input_type",
+    [list, np.array, pd.Index, pd.Series],
+)
+def test_discrete_inputs(values, expected_type, input_type):
+    """Test DiscreteEmpirical works with different input types."""
+    dist = dists.DiscreteEmpirical(
+        values=input_type(values), freq=[0.2, 0.5, 0.3], random_seed=42
+    )
+    result = dist.sample()
+    assert isinstance(result, expected_type)
+    assert result in values
+
+
+@pytest.mark.parametrize(
     "n, lower_bound",
     [
         (1, 10.0),
@@ -245,36 +268,3 @@ def test_truncated_min(n, lower_bound):
     d1 = dists.Normal(10, 1, random_seed=SEED_1)
     d2 = dists.TruncatedDistribution(d1, lower_bound=lower_bound)
     assert min(d2.sample(size=n)) >= lower_bound
-
-
-def test_registry_batch_sorting():
-    """Check that DistributionRegistry.create_batch() sorting works."""
-    d_config = {
-        "b_dist": {"class_name": "Exponential", "params": {"mean": 1}},
-        "a_dist": {"class_name": "Exponential", "params": {"mean": 1}}
-    }
-    d_sorted = dists.DistributionRegistry.create_batch(d_config, sort=True)
-    d_unsorted = dists.DistributionRegistry.create_batch(d_config, sort=False)
-    assert list(d_sorted.keys()) == ["a_dist", "b_dist"]
-    assert list(d_unsorted.keys()) == ["b_dist", "a_dist"]
-
-
-@pytest.mark.parametrize("conf, should_pass", [
-    ({"class_name": "Exponential", "params": {"mean": 1}}, True),
-    ({"class_name": "Exponential"}, False),
-    ({"params": {"mean": 1}}, False),
-    ({"class_name": "Exponential", "params": {"mean": 1}, "foo": 123}, False),
-    ({"CLASS_NAME": "Exponential", "params": {"mean": 1}}, False),
-])
-def test_registry_batch_validation(conf, should_pass):
-    """
-    Check that DistributionRegistry.create_batch() warns for unsuitable
-    distribution configurations.
-    """
-    seed = 123
-    if should_pass:
-        obj = dists.DistributionRegistry._validate_and_create(conf, seed)
-        assert hasattr(obj, "sample")
-    else:
-        with pytest.raises(ValueError):
-            dists.DistributionRegistry._validate_and_create(conf, seed)
