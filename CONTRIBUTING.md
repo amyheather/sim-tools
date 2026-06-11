@@ -17,7 +17,16 @@ You are welcome to make contributions to the code. To do so please:
 
 ## Environment
 
-A conda environment is provided for development.
+You can install development dependencies from `pyproject.toml` using your preferred environment manager. For example:
+
+```bash
+conda create -n sim_tools python=3.12
+conda activate sim_tools
+pip install -e .
+pip install --group dev
+```
+
+A pinned conda environment environment is also provided:
 
 ```bash
 conda env create -f binder/environment.yml
