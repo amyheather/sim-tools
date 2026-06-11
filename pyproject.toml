@@ -65,6 +65,9 @@ lint.select = [
     "F",    # pyflakes
     "E",    # pycodestyle
 ]
+lint.per-file-ignores."user_guide/*" = [
+    "F811",  # Redefinition of unused {name} from {row}
+]
 
 [tool.lintquarto]
 linters = [

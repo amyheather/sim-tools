@@ -63,7 +63,7 @@ In `trace` the `config` parameter is a user settable dictionary object. It can b
 
 The default`config` is
 
-```python
+```{.python}
 config = {
     "class":None, 
     "class_colour":"bold blue", 

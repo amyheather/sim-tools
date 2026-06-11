@@ -9,7 +9,7 @@ This notebook provides an overview of how to use the `Distribution` classes from
 
 The classes are a higher level abstract of sampling from the numpy library. They encapsulate the distribution parameters, a random number generator instance, and a random seed.  For example, the code for the Exponential class is:
 
-```python
+```{.python}
 class Exponential:
     """
     Exponential distribution implementation.
@@ -76,7 +76,7 @@ The abstraction into a class enables the distribution to be used as a simple par
 
 For some classes there are no direct mappings to `numpy`.  Samples from these distributions are typically derived from other distributions. For example, `PearsonV` is an inverse gamma distribution.
 
-```python
+```{.python}
 class PearsonV:
     """
     Pearson Type V distribution implementation (inverse Gamma distribution).

@@ -57,7 +57,7 @@ The `ReplicationAlgorithm` requires an observer. This is an object whose job it 
 
 A suitable observer is supplied by default - `ReplicationTabulizer` - but you can also create your own, but it needs to follow this protocol:
 
-```python
+```{.python}
 @runtime_checkable
 class AlgorithmObserver(Protocol):
     """
@@ -118,7 +118,7 @@ The `ReplicationsAlgorithm` needs to be able to **call any model in a consistent
 
 We formalise what the adapter must look like with a **Protocol** called `ReplicationsAlgorithmModelAdapter`.
 
-```python
+```{.python}
 @runtime_checkable
 class ReplicationsAlgorithmModelAdapter(Protocol):
     """
