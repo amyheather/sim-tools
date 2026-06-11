@@ -60,20 +60,20 @@ The function accepts three keyword arguments:
 
 For example, the following code creates a simulation model with 10 designs with means 1 to 10 and unit variance.
 
-```python
+```{.python}
 model = guassian_sequence_model(1, 10)
 ```
 
 To create a simulation model with 5 designs where $\mu_{i+1} - \mu_i = 2 $ :
 
-```python
+```{.python}
 model = guassian_sequence_model(1, 10, step=2)
 ```
 
 ### Creating a custom model with known designs
-Instead of a sequence of normal distributions with unit variance, it is possible to create a custom set of designs with varying variances. Use the `custom_guassian_model` function for this task.  For example to create a custom set of designs: 
+Instead of a sequence of normal distributions with unit variance, it is possible to create a custom set of designs with varying variances. Use the `custom_guassian_model` function for this task.  For example to create a custom set of designs:
 
-```python
+```{.python}
 means = [5, 8, 1, 2, 1, 7]
 variances = [0.1, 1.2, 1.4, 0.3, 0.8]
 
@@ -82,7 +82,7 @@ custom_model = custom_guassian_model(means, variances)
 
 The following code demonstrates how to create a sequence of 100 designs with variances that are 10% of the mean. 
 
-```python
+```{.python}
 n_designs = 100
 means = [i for i in range(n_designs+1)]
 variances = [j*0.1 for j in range(n_designs+1)]
@@ -95,7 +95,7 @@ custom_model = custom_guassian_model(means, variances)
 
 To create a model with a set of unknown designs (within a specified mean and variance tolerance) use 
 
-```python
+```{.python}
 mean_low = 1.0
 mean_high = 15.0
 var_low = 0.1
@@ -309,7 +309,7 @@ We will now explore how the IZ procedures perform on a slightly harder optimisat
 
 The problem is: 
 
-```python
+```{.python}
 means = [4, 4.1, 4.2, 4, 4.1, 4.3, 4, 4.1, 4.2, 4.2]
 variances = [1, 1, 1, 0.1, 0.1, 10, 10, 10, 10, 0.1]
 ```
@@ -318,7 +318,7 @@ The 'optimal' mean design is at index 5 (4.3). It is a very noisy design.   We w
 
 Your task is to compare the performance of KN and KN++ given the following parameters:
 
-```python
+```{.python}
 N_DESIGNS = 10
 N_0 = 10
 DELTA = 0.15

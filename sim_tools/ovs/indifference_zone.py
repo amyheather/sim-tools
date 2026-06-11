@@ -411,19 +411,19 @@ class KN:
 
         # designs in contention for this round
         for i, design_i in enumerate(self._contenders_old):
-            for l, design_l in enumerate(self._contenders_old):
-                if i != l:
-                    if not self._design_still_in_contention(design_i, design_l):
+            for j, design_j in enumerate(self._contenders_old):
+                if i != j:
+                    if not self._design_still_in_contention(design_i, design_j):
                         contenders_mask[i] = False
                         break
 
         self._contenders = self._contenders[contenders_mask]
 
-    def _design_still_in_contention(self, design_i, design_l):
-        w_il = self._limit_to_distance_from_sample_means(design_i, design_l)
+    def _design_still_in_contention(self, design_i, design_j):
+        w_il = self._limit_to_distance_from_sample_means(design_i, design_j)
 
         mean_i = self._means[design_i]
-        mean_l = self._means[design_l]
+        mean_l = self._means[design_j]
 
         return mean_i >= mean_l - w_il
 
