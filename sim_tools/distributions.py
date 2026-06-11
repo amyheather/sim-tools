@@ -1571,34 +1571,34 @@ class RawContinuousEmpirical:
         if size is None:
             # single sample
 
-            I = int(P) + 1
+            index = int(P) + 1
 
             # Handle edge case when I is the last index
-            if I >= n - 1:
+            if index >= n - 1:
                 # return maximum value
                 return self.data[-1]
 
-            frac = P - I
-            lower = self.data[I]
-            upper = self.data[I + 1]
+            frac = P - index
+            lower = self.data[index]
+            upper = self.data[index + 1]
             return max(lower + frac * (upper - lower), self.data[0])
 
-        I = P.astype(int) + 1
+        index = P.astype(int) + 1
         # array operations
-        mask = I >= n - 1
+        mask = index >= n - 1
         result = np.empty_like(P, dtype=float)
 
-        # Handle edge cases where I equals n-1
+        # Handle edge cases where index equals n-1
         if np.any(mask):
             result[mask] = self.data[-1]
 
         # Process normal cases with interpolation
         if np.any(~mask):
-            valid_I = I[~mask]
+            valid_index = index[~mask]
             valid_P = P[~mask]
-            frac = valid_P - valid_I
-            lower = self.data[valid_I]
-            upper = self.data[valid_I + 1]
+            frac = valid_P - valid_index
+            lower = self.data[valid_index]
+            upper = self.data[valid_index + 1]
             result[~mask] = lower + frac * (upper - lower)
 
         # return clipped to lower value
