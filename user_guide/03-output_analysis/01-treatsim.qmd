@@ -18,7 +18,6 @@ pip install treat-sim
 
 
 ```{python}
-# pylint: disable=missing-module-docstring
 from treat_sim.model import Scenario, single_run, multiple_replications
 ```
 

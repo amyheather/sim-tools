@@ -1,4 +1,3 @@
-# pylint: disable=too-many-lines
 """
 module: output_analysis
 
@@ -41,7 +40,6 @@ ALG_INTERFACE_ERROR = (
 )
 
 
-# pylint: disable=too-few-public-methods
 @runtime_checkable
 class ReplicationObserver(Protocol):
     """
@@ -695,7 +693,6 @@ class ReplicationsAlgorithmModelAdapter(Protocol):
         """
 
 
-# pylint: disable=too-many-instance-attributes
 class ReplicationsAlgorithm:
     """
     Automatically determine the number of simulation replications needed
@@ -745,7 +742,6 @@ class ReplicationsAlgorithm:
     https://www.jstor.org/stable/40926090
     """
 
-    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def __init__(
         self,
         alpha: Optional[float] = 0.05,
@@ -918,7 +914,6 @@ class ReplicationsAlgorithm:
                     return i + 1
         return None
 
-    # pylint: disable=too-many-branches
     def select(
         self, model: ReplicationsAlgorithmModelAdapter, metrics: list[str]
     ) -> dict[str, int]:

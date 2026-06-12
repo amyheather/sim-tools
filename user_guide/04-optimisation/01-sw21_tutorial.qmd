@@ -17,8 +17,6 @@ This tutorial introduces Ranking and Selection procedures for stochastic compute
 
 
 ```{python}
-# pylint: disable=missing-module-docstring,invalid-name
-
 # run this first to install the OvS procedures so we can use them in the
 # tutorial.
 # !pip install sim-tools

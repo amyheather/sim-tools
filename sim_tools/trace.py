@@ -21,7 +21,6 @@ CONFIG_ERROR = (
 _console = Console()
 
 
-# pylint: disable=too-few-public-methods
 class Traceable(ABC):
     """
     Provides basic trace functionality for a process to subclass.

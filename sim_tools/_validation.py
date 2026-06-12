@@ -92,7 +92,6 @@ def is_ordered_pair(
         )
 
 
-# pylint: disable=too-many-arguments,too-many-positional-arguments
 def is_ordered_triplet(
     low: Any,
     middle: Any,

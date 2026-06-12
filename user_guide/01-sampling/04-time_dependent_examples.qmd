@@ -37,7 +37,6 @@ Here $i$ is the arrival number and $\mathcal{T_i}$ is its arrival time.
 ## `sim-tools` imports
 
 ```{python}
-# pylint: disable=missing-module-docstring,invalid-name
 import numpy as np
 import matplotlib.pyplot as plt
 

@@ -10,8 +10,6 @@ jupyter: python3
 The model used to demonstrate trace functionality is implemented in `simpy`
 
 ```{python}
-# pylint: disable=missing-module-docstring,invalid-name,too-many-lines
-
 import itertools
 
 import numpy as np
@@ -152,8 +150,6 @@ load_arrival_profile(NSPP_PATH)
 ```
 
 ```{python}
-# pylint: disable=too-many-instance-attributes,too-many-arguments
-# pylint: disable=too-many-positional-arguments,too-many-locals
 class Scenario:
     """
     Container class for scenario parameters/arguments
@@ -302,7 +298,6 @@ class Scenario:
         self.random_number_set = random_number_set
         self.init_sampling()
 
-    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def init_resourse_counts(
         self, n_triage, n_reg, n_exam, n_trauma, n_cubicles_1, n_cubicles_2
     ):

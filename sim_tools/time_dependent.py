@@ -13,7 +13,6 @@ from numpy.random import SeedSequence
 from sim_tools.distributions import DistributionRegistry
 
 
-# pylint: disable=too-few-public-methods
 @DistributionRegistry.register()
 class NSPPThinning:
     """

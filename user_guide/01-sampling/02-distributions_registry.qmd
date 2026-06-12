@@ -31,7 +31,6 @@ The `DistributionRegistry` is part of the `distributions` module.  You can think
 
 
 ```{python}
-# pylint: disable=missing-module-docstring,invalid-name
 import json
 
 import numpy as np

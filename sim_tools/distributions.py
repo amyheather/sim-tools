@@ -1,4 +1,3 @@
-# pylint: disable=too-many-lines
 """
 Statistical distribution classes for simulation modeling.
 
@@ -122,7 +121,6 @@ from sim_tools._validation import (
 T = TypeVar("T", bound=type)
 
 
-# pylint: disable=too-few-public-methods
 @runtime_checkable
 class Distribution(Protocol):
     """
@@ -687,7 +685,6 @@ class DistributionRegistry:
         return template
 
 
-# pylint: disable=too-few-public-methods
 @DistributionRegistry.register()
 class Exponential:
     """
@@ -750,7 +747,6 @@ class Exponential:
         return self.rng.exponential(self.mean, size=size)
 
 
-# pylint: disable=too-few-public-methods
 @DistributionRegistry.register()
 class Bernoulli:
     """
