@@ -256,26 +256,27 @@ import matplotlib.pyplot as plt
 
 # Import a selection of distributions
 from sim_tools.distributions import (
-    Exponential,
-    Poisson,
     Bernoulli,
-    Lognormal,
-    Normal,
-    Uniform,
-    Triangular,
-    FixedDistribution,
+    Beta,
     CombinationDistribution,
-    GroupedContinuousEmpirical,
+    DiscreteEmpirical,
     Erlang,
     ErlangK,
-    Weibull,
+    Exponential,
+    FixedDistribution,
     Gamma,
-    Beta,
-    DiscreteEmpirical,
+    GroupedContinuousEmpirical,
+    Hyperexponential,
+    Lognormal,
+    Normal,
     PearsonV,
     PearsonVI,
-    Hyperexponential,
+    Poisson,
+    Triangular,
+    Uniform,
+    Weibull,
 )
+
 ```
 
 ### Create plots

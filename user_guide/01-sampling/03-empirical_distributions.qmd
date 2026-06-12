@@ -14,17 +14,19 @@ In many applications of simulation, theoretical distributons may not be a good f
 
 ```{python}
 import math
+
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 from sim_tools.distributions import (
-    RawContinuousEmpirical,
-    GroupedContinuousEmpirical,
-    RawDiscreteEmpirical,
     DistributionRegistry,
+    GroupedContinuousEmpirical,
+    RawContinuousEmpirical,
+    RawDiscreteEmpirical,
 )
+
 ```
 
 ## 1. Sampling from the raw data with interpolation

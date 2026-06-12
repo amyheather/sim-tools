@@ -18,8 +18,11 @@ import itertools
 from typing import Optional
 
 import simpy
-from sim_tools.trace import trace
+
 from sim_tools.distributions import Exponential
+from sim_tools.trace import trace
+
+
 ```
 
 ## 2. A trace using default colouring
