@@ -8,7 +8,6 @@ from typing import Optional
 
 from rich.console import Console
 
-
 DEFAULT_DEBUG = False
 
 CONFIG_ERROR = (

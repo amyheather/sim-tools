@@ -10,6 +10,7 @@ The Confidence Interval Method (tables and visualisation)
 The Replications Algorithm (Hoad et al. 2010).
 """
 
+import warnings
 from typing import (
     Any,
     Callable,
@@ -17,17 +18,15 @@ from typing import (
     List,
     Optional,
     Protocol,
-    runtime_checkable,
     Sequence,
     Union,
+    runtime_checkable,
 )
-import warnings
 
-import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
+import plotly.graph_objects as go
 from scipy.stats import t
-
 
 OBSERVER_INTERFACE_ERROR = (
     "Observers of OnlineStatistics must implement "

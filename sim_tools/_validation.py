@@ -39,6 +39,7 @@ Validation functions raise appropriate exceptions with descriptive messages:
 """
 
 from typing import Any, Callable
+
 import numpy as np
 
 # Type for validator functions
