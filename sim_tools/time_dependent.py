@@ -3,7 +3,6 @@ Classes and functions to support time dependent samplingm in DES models.
 """
 
 import itertools
-from typing import Optional, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -29,9 +28,9 @@ class NSPPThinning:
     def __init__(
         self,
         data: pd.DataFrame,
-        interval_width: Optional[float] = None,
-        random_seed1: Optional[int | SeedSequence] = None,
-        random_seed2: Optional[int | SeedSequence] = None,
+        interval_width: float | None = None,
+        random_seed1: int | SeedSequence | None = None,
+        random_seed2: int | SeedSequence | None = None,
     ):
         """
         Non Stationary Poisson Process via Thinning.
@@ -164,8 +163,8 @@ class NSPPThinning:
 
 def nspp_simulation(
     arrival_profile: pd.DataFrame,
-    run_length: Optional[float] = None,
-    n_reps: Optional[int] = 1000,
+    run_length: float | None = None,
+    n_reps: int | None = 1000,
 ) -> pd.DataFrame:
     """
     Generate a pandas dataframe that contains multiple replications of
@@ -249,9 +248,9 @@ def nspp_simulation(
 
 def nspp_plot(
     arrival_profile: pd.DataFrame,
-    run_length: Optional[float] = None,
-    n_reps: Optional[int] = 1000,
-) -> Tuple[plt.Figure, plt.Axes]:
+    run_length: float | None = None,
+    n_reps: int | None = 1000,
+) -> tuple[plt.Figure, plt.Axes]:
     """
     Generate a matplotlib chart to visualise a non-stationary poisson process
     for the set arrival profile.
