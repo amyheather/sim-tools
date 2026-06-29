@@ -64,7 +64,10 @@ format.quote-style="double"
 lint.select = [
     "F",    # Pyflake rules
     "E",    # Pycodestyle errors
+    "W",    # Pycodestyle warnings
     "I",    # Sort imports
+    "ICN",  # Conventions for how certain packages should be imported or aliased
+    "TID",  # Tidy imports
     "UP",   # Rewrites older syntax into modern, cleaner syntax
 ]
 lint.per-file-ignores."user_guide/*" = [
