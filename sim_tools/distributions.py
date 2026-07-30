@@ -99,6 +99,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from numpy.random import SeedSequence
 from numpy.typing import ArrayLike, NDArray
+from scipy.stats import beta, betaprime, gamma, invgamma, triang, weibull_min
 
 from sim_tools._validation import (
     is_integer,
@@ -744,6 +745,28 @@ class Exponential:
         """
         return self.rng.exponential(self.mean, size=size)
 
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        Exponential
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+        mean = np.mean(data)
+        return cls(mean=mean, random_seed=random_seed)
+
 
 @DistributionRegistry.register()
 class Bernoulli:
@@ -900,6 +923,29 @@ class Lognormal:
         """
         return self.rng.lognormal(self.mu, self.sigma, size=size)
 
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        Lognormal
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+        mean = np.mean(data)
+        stdev = np.std(data)
+        return cls(mean=mean, stdev=stdev, random_seed=random_seed)
+
 
 @DistributionRegistry.register()
 class Normal:
@@ -998,6 +1044,39 @@ class Normal:
         samples[below_min_idx] = self.minimum
         return samples
 
+    @classmethod
+    def fit(
+        cls,
+        data: ArrayLike,
+        minimum: float | None = None,
+        random_seed: int | SeedSequence | None = None,
+    ):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        minimum : Optional[float], default=None
+            If provided, truncates the distribution to this minimum value.
+            Any sampled values below this minimum will be set to this value.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        Normal
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+        mean = np.mean(data)
+        stdev = np.std(data)
+        if minimum is not None:
+            return cls(mean=mean, sigma=stdev, minimum=minimum, random_seed=random_seed)
+        return cls(mean=mean, sigma=stdev, random_seed=random_seed)
+
 
 @DistributionRegistry.register()
 class Uniform:
@@ -1064,6 +1143,29 @@ class Uniform:
             - A numpy array of floats with shape determined by size parameter
         """
         return self.rng.uniform(low=self.low, high=self.high, size=size)
+
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        Uniform
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+        minimum = np.min(data)
+        maximum = np.max(data)
+        return cls(low=minimum, high=maximum, random_seed=random_seed)
 
 
 @DistributionRegistry.register()
@@ -1140,6 +1242,34 @@ class Triangular:
             - A numpy array of floats with shape determined by size parameter
         """
         return self.rng.triangular(self.low, self.mode, self.high, size=size)
+
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Use scipy.stats.triang because finding mode of continuous data can
+        be tricky (e.g., if data has long floats or many decimal places).
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        Triangular
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+        c, loc, scale = triang.fit(data)
+        low = loc
+        mode = loc + c * scale
+        high = loc + scale
+        return cls(low=low, mode=mode, high=high, random_seed=random_seed)
 
 
 @DistributionRegistry.register()
@@ -1929,6 +2059,29 @@ class Erlang:
         """
         return self.rng.gamma(self.k, self.theta, size) + self.location
 
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        Erlang
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+        mean = np.mean(data)
+        stdev = np.std(data)
+        return cls(mean=mean, stdev=stdev, random_seed=random_seed)
+
 
 @DistributionRegistry.register()
 class Weibull:
@@ -2069,6 +2222,28 @@ class Weibull:
         """
         return self.scale * self.rng.weibull(self.shape, size) + self.location
 
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        Weibull
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+        shape, loc, scale = weibull_min.fit(data)
+        return cls(alpha=shape, beta=scale, location=loc, random_seed=random_seed)
+
 
 @DistributionRegistry.register()
 class Gamma:
@@ -2202,6 +2377,28 @@ class Gamma:
         samples = self.rng.gamma(self.alpha, self.beta, size)
         return samples + self.location
 
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        Gamma
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+        shape, loc, scale = gamma.fit(data)
+        return cls(alpha=shape, beta=scale, location=loc, random_seed=random_seed)
+
 
 @DistributionRegistry.register()
 class Beta:
@@ -2301,6 +2498,36 @@ class Beta:
         return self.min + (
             (self.max - self.min) * self.rng.beta(self.alpha1, self.alpha2, size)
         )
+
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        Beta
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+
+        # Normalise data to [0, 1]
+        minimum = np.min(data)
+        maximum = np.max(data)
+        normalised = (data - minimum) / (maximum - minimum)
+
+        # Passed floc and fscale to fix the location and scale, as the
+        # sim-tools Beta class does not support use of these
+        a, b, loc, scale = beta.fit(normalised, floc=0, fscale=1)
+        return cls(random_seed=random_seed)
 
 
 @DistributionRegistry.register()
@@ -2684,6 +2911,29 @@ class PearsonV:
         """
         return 1 / self.rng.gamma(self.alpha, 1 / self.beta, size)
 
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        PearsonV
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+        # Fixed floc=0 as sim-tools PearsonV doesn't accept location parameter
+        a, loc, scale = invgamma.fit(data, floc=0)
+        return cls(alpha=a, beta=scale, random_seed=random_seed)
+
 
 @DistributionRegistry.register()
 class PearsonVI:
@@ -2827,6 +3077,29 @@ class PearsonVI:
         # Pearson6(a1,a2,b)=b∗X/(1−X), where X=Beta(a1,a2,1)
         x = self.rng.beta(self.alpha1, self.alpha2, size)
         return self.beta * x / (1 - x)
+
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        PearsonVI
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+        # Fixed floc=0 as sim-tools PearsonVI doesn't accept location parameter
+        a, b, loc, scale = betaprime.fit(data, floc=0)
+        return cls(alpha1=a, alpha2=b, beta=scale, random_seed=random_seed)
 
 
 @DistributionRegistry.register()
