@@ -86,6 +86,7 @@ Modeling and Analysis" (Law, 2007) where applicable.
 import inspect
 import json
 import math
+import warnings
 from collections.abc import Callable
 from typing import (
     Any,
@@ -2537,14 +2538,31 @@ class Beta:
         )
 
     @classmethod
-    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+    def fit(
+        cls,
+        data: ArrayLike,
+        lower_bound: float = None,
+        upper_bound: float = None,
+        random_seed: int | SeedSequence | None = None,
+    ):
         """
         Create a distribution by fitting to observed data.
+
+        Ideally, supply the true bounds of the quantity. They are then held
+        fixed and only the two shape parameters are estimated, which is more
+        accurate and stable. If the bounds are omitted, all four parameters
+        (two shapes and two bounds) are estimated from the data. This is less
+        reliable, particularly when a shape parameter is below 1, and a
+        warning is raised.
 
         Parameters
         ----------
         data : ArrayLike
             Observed data to fit distribution to.
+        lower_bound : float, optional
+            Known lower bound. Must be given together with upper_bound.
+        upper_bound : float, optional
+            Known upper bound. Must be given together with lower_bound.
         random_seed : Optional[Union[int, SeedSequence]], default=None
             A random seed or SeedSequence to reproduce samples. If None, a
             unique sample sequence is generated.
@@ -2553,22 +2571,54 @@ class Beta:
         -------
         Beta
             A new instance initialised with the fitted parameters.
+
+        Warns
+        -----
+        UserWarning
+            If the bounds are not both provided, so they are estimated from
+            the data.
         """
         data = np.asarray(data, dtype=np.float64)
 
-        # Normalise data to [0, 1]
-        minimum = np.min(data)
-        maximum = np.max(data)
-        normalised = (data - minimum) / (maximum - minimum)
+        # When we have known bounds, we fix them (using floc and fscale) and
+        # then only estimate alpha1 and alpha2. This is the recommended way to
+        # fit beta in scipy. In the documentation, it warns that trying to
+        # estimate the bounds as well is unreliable as the problem is
+        # unbounded. In scipy, loc is the lower bound and scale is the width
+        # of the interval
+        if lower_bound is not None and upper_bound is not None:
+            a, b, loc, scale = beta.fit(
+                data, floc=lower_bound, fscale=upper_bound - lower_bound
+            )
 
-        # Passed floc and fscale to fix the location and scale, as the
-        # sim-tools Beta class does not support use of these
-        a, b, loc, scale = beta.fit(normalised, floc=0, fscale=1)
+        # If bounds are unknown, estimate all four parameters. We can't use
+        # the minimum and maximum as the bounds as that will break fit -
+        # instead we set the bounds to slightly wider the data so every
+        # observation is strictly inside the bounds
+        else:
+            warnings.warn(
+                "Beta.fit() was not given both lower_bound and upper_bound, "
+                "so the bounds are being estimated from the data. This can be "
+                "unreliable, especially if a shape parameter is below 1. "
+                "Where possible, provide the actual limits of the quantity "
+                "(not the sample minimum and maximum).",
+                UserWarning,
+                stacklevel=2,
+            )
+
+            minimum = np.min(data)
+            data_range = np.max(data) - minimum
+            a, b, loc, scale = beta.fit(
+                data,
+                loc=minimum - 0.05 * data_range,
+                scale=1.1 * data_range,
+            )
+
         return cls(
             alpha1=a,
             alpha2=b,
-            lower_bound=minimum,
-            upper_bound=maximum,
+            lower_bound=loc,
+            upper_bound=loc + scale,
             random_seed=random_seed,
         )
 

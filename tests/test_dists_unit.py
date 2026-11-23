@@ -294,7 +294,6 @@ def test_truncated_min(n, lower_bound):
     assert min(d2.sample(size=n)) >= lower_bound
 
 
-
 @pytest.mark.parametrize(
     "dist_class, params",
     [
@@ -313,10 +312,31 @@ def test_truncated_min(n, lower_bound):
         (dists.Weibull, {"alpha": 2, "beta": 0.5, "location": 3}),
         (dists.Gamma, {"alpha": 2, "beta": 0.5, "location": 0}),
         (dists.Gamma, {"alpha": 2, "beta": 0.5, "location": 3}),
+        (dists.Beta, {"alpha1": 2, "alpha2": 2}),
+        (dists.Beta, {"alpha1": 2, "alpha2": 5}),
+        (dists.Beta, {"alpha1": 5, "alpha2": 2}),
+        (dists.Beta, {"alpha1": 1, "alpha2": 1}),
+        (dists.Beta, {"alpha1": 3, "alpha2": 0.5, "lower_bound": 0, "upper_bound": 1}),
         (dists.Beta, {"alpha1": 4, "alpha2": 5}),
         (dists.Beta, {"alpha1": 4, "alpha2": 5, "lower_bound": 1, "upper_bound": 2}),
-        (dists.PearsonV, {"alpha": 2, "beta": 0.5,}),
-        (dists.PearsonVI, {"alpha1": 4, "alpha2": 5, "beta": 0.5,}),
+        (dists.Beta, {"alpha1": 4, "alpha2": 5, "lower_bound": -10, "upper_bound": 5}),
+        (dists.Beta, {"alpha1": 2, "alpha2": 5, "lower_bound": 100, "upper_bound": 500}),
+        (dists.Beta, {"alpha1": 0.5, "alpha2": 3, "lower_bound": 0, "upper_bound": 1}),
+        (
+            dists.PearsonV,
+            {
+                "alpha": 2,
+                "beta": 0.5,
+            },
+        ),
+        (
+            dists.PearsonVI,
+            {
+                "alpha1": 4,
+                "alpha2": 5,
+                "beta": 0.5,
+            },
+        ),
         # (dists.ErlangK)
         # (dists.Poisson)
         # (dists.Hyperexponential)
@@ -332,17 +352,27 @@ def test_fit(dist_class, params):
     data = original.sample(100_000)
 
     # Check estimated parameters from fit() match known parameters used
-    fitted = dist_class.fit(data)
+    fit_kwargs = {}
+    if dist_class is dists.Beta and min(params["alpha1"], params["alpha2"]) < 1:
+        fit_kwargs = {
+            "lower_bound": params["lower_bound"],
+            "upper_bound": params["upper_bound"],
+        }
+    fitted = dist_class.fit(data, **fit_kwargs)
     for name, expected in params.items():
-
         # Get the attribute from the fitted class
-        # Weibull stores alpha and beta as shape and scale
+        # If stored attributes have different name, use that
         attribute = name
         if dist_class is dists.Weibull:
             if name == "alpha":
                 attribute = "shape"
             if name == "beta":
                 attribute = "scale"
+        if dist_class is dists.Beta:
+            if name == "lower_bound":
+                attribute = "min"
+            if name == "upper_bound":
+                attribute = "max"
         value = getattr(fitted, attribute)
 
         # Relative tolerance is not helpful near 0, so use absolute instead
