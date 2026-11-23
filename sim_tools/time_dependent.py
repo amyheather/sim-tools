@@ -1,5 +1,5 @@
 """
-Classes and functions to support time dependent samplingm in DES models.
+Classes and functions to support time-dependent sampling in DES models.
 """
 
 import itertools
