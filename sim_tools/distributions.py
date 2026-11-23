@@ -2457,8 +2457,23 @@ class Gamma:
         -------
         Gamma
             A new instance initialised with the fitted parameters.
+
+        Raises
+        ------
+        ValueError
+            If any value in `data` is zero or negative. Maximum likelihood
+            estimation for the gamma distribution involves the log of each
+            observation, so zeros cannot be used. Remove zeros or use a
+            distribution that allows them.
         """
         data = np.asarray(data, dtype=np.float64)
+
+        if np.any(data <= 0):
+            raise ValueError(
+                "Gamma.fit requires all data to be > 0. "
+                "Remove zeros or use a distribution that allows them."
+            )
+
         shape, loc, scale = gamma.fit(data)
 
         # Location must be non-negative. If the fit gives a negative value,

@@ -415,7 +415,15 @@ def test_fit(dist_class, params):
 )
 def test_fit_zeroes(dist_class, params):
     """Check that fitting runs as expected with zeroes present."""
+    # Generate sample then set some values to 0
     original = dist_class(**params, random_seed=101)
     data = original.sample(100_000)
     data[:10] = 0
-    dist_class.fit(data)
+
+    if dist_class is dists.Gamma:
+        with pytest.raises(ValueError, match="> 0"):
+            dist_class.fit(data)
+    else:
+        fitted = dist_class.fit(data)
+        assert isinstance(fitted, dist_class)
+        assert np.all(np.isfinite(fitted.sample(1_000)))
