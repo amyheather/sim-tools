@@ -3546,9 +3546,8 @@ class Hyperexponential:
         float
             Variance value: 2 * sum(p_i / λ_i^2) - [sum(p_i / λ_i)]^2
         """
-        mean = self.mean()
         second_moment = 2 * np.sum(self.probs / (self.rates**2))
-        return second_moment - mean**2
+        return second_moment - self.mean**2
 
     def sample(
         self, size: int | tuple[int, ...] | None = None
