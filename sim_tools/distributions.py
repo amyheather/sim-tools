@@ -2427,6 +2427,13 @@ class Gamma:
         """
         data = np.asarray(data, dtype=np.float64)
         shape, loc, scale = gamma.fit(data)
+
+        # Location must be non-negative. If the fit gives a negative value,
+        # refit with the location fixed at 0 so that alpha and beta are
+        # estimated with no offset
+        if loc < 0:
+            shape, loc, scale = gamma.fit(data, floc=0)
+
         return cls(alpha=shape, beta=scale, location=loc, random_seed=random_seed)
 
 
