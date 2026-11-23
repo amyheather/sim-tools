@@ -299,6 +299,7 @@ def test_truncated_min(n, lower_bound):
     [
         (dists.Exponential, {"mean": 5}),
         (dists.Lognormal, {"mean": 6, "stdev": 3}),
+        (dists.Normal, {"mean": 6, "sigma": 3}),
         (dists.Normal, {"mean": 6, "sigma": 3, "minimum": 0}),
         (dists.Normal, {"mean": 6, "sigma": 3, "minimum": 2}),
         (dists.Uniform, {"low": 0, "high": 1}),
@@ -358,7 +359,10 @@ def test_fit(dist_class, params):
             "lower_bound": params["lower_bound"],
             "upper_bound": params["upper_bound"],
         }
+    if dist_class is dists.Normal and "minimum" in params:
+        fit_kwargs = {"minimum": params["minimum"]}
     fitted = dist_class.fit(data, **fit_kwargs)
+
     for name, expected in params.items():
         # Get the attribute from the fitted class
         # If stored attributes have different name, use that
