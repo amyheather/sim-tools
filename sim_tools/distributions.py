@@ -708,8 +708,10 @@ class Exponential:
         Parameters
         ----------
         mean : float
-            The mean of the exponential distribution.
-            Must be positive.
+            The mean of the exponential distribution. If your data are time
+            between events, then this will be the average time between events,
+            which can be expressed as 1 / rate (λ). Otherwise, it is simply
+            the mean of the positive quantity being modelled. Must be positive.
 
         random_seed : Optional[Union[int, SeedSequence]], default=None
             A random seed or SeedSequence to reproduce samples. If None, a
@@ -2057,7 +2059,7 @@ class Erlang:
             - A single float when size is None
             - A numpy array of floats with shape determined by size parameter
         """
-        return self.rng.gamma(self.k, self.theta, size) + self.location
+        return self.rng.gamma(shape=self.k, scale=self.theta, size=size) + self.location
 
     @classmethod
     def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
@@ -2078,9 +2080,37 @@ class Erlang:
             A new instance initialised with the fitted parameters.
         """
         data = np.asarray(data, dtype=np.float64)
-        mean = np.mean(data)
-        stdev = np.std(data)
-        return cls(mean=mean, stdev=stdev, random_seed=random_seed)
+
+        # We use gamma.fit as it's just the same as erlang.fit. The only
+        # difference is that erlang expects an integer shape, so will produce
+        # a warning message for non-integers - but it doesn't enforce integers
+
+        # Fit gamma distribution. Gamma allows any positive shape, but Erlang
+        # needs a whole number, so this fit is used just to find roughly
+        # which integer to pick
+        shape, loc, scale = gamma.fit(data)
+
+        # Round shape to the nearest whole number, but don't allow it to be
+        # 0 which would break everything
+        k = max(1, round(shape))
+
+        # Fit again, but using the k integer. Now, we are just finding the
+        # best loc and scale for that integer shape
+        _, loc, scale = gamma.fit(data, f0=k)
+
+        # Our class requires location to be non-negative
+        if loc >= 0:
+            # Calculate the mean and standard deviation, before the offset
+            # (Can't use original mean/stdev as need to account for loc)
+            mean = k * scale
+            stdev = np.sqrt(k) * scale
+        else:
+            # With no offset, we can just use the data mean and stdev
+            mean = np.mean(data)
+            stdev = np.std(data)
+            loc = 0
+
+        return cls(mean=mean, stdev=stdev, location=loc, random_seed=random_seed)
 
 
 @DistributionRegistry.register()
@@ -2527,7 +2557,13 @@ class Beta:
         # Passed floc and fscale to fix the location and scale, as the
         # sim-tools Beta class does not support use of these
         a, b, loc, scale = beta.fit(normalised, floc=0, fscale=1)
-        return cls(random_seed=random_seed)
+        return cls(
+            alpha1=a,
+            alpha2=b,
+            lower_bound=minimum,
+            upper_bound=maximum,
+            random_seed=random_seed,
+        )
 
 
 @DistributionRegistry.register()
