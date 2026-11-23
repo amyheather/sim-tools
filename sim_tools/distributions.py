@@ -3424,6 +3424,28 @@ class Poisson:
         """
         return self.rng.poisson(self.rate, size)
 
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        Poisson
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+        mean = np.mean(data)
+        return cls(rate=mean, random_seed=random_seed)
+
 
 @DistributionRegistry.register()
 class Hyperexponential:

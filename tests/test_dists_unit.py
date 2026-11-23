@@ -316,13 +316,6 @@ def test_truncated_min(n, lower_bound):
         (dists.Erlang, {"mean": 6, "stdev": 3, "location": 0}),
         (dists.Erlang, {"mean": 6, "stdev": 3, "location": 9}),
         (dists.Erlang, {"mean": 5, "stdev": 3}),
-        (dists.ErlangK, {"k": 1, "theta": 4}),
-        (dists.ErlangK, {"k": 2, "theta": 3}),
-        (dists.ErlangK, {"k": 3, "theta": 2}),
-        (dists.ErlangK, {"k": 5, "theta": 0.5}),
-        (dists.ErlangK, {"k": 10, "theta": 1}),
-        (dists.ErlangK, {"k": 3, "theta": 2, "location": 5}),
-        (dists.ErlangK, {"k": 10, "theta": 1, "location": 9}),
         (dists.Weibull, {"alpha": 1, "beta": 0.5}),
         (dists.Weibull, {"alpha": 2, "beta": 0.5}),
         (dists.Weibull, {"alpha": 2, "beta": 0.5, "location": 0}),
@@ -342,8 +335,16 @@ def test_truncated_min(n, lower_bound):
         (dists.PearsonV, {"alpha": 2, "beta": 0.5}),
         (dists.PearsonV, {"alpha": 5, "beta": 0.5}),
         (dists.PearsonVI, {"alpha1": 4, "alpha2": 5, "beta": 0.5}),
-        # (dists.ErlangK)
-        # (dists.Poisson)
+        (dists.ErlangK, {"k": 1, "theta": 4}),
+        (dists.ErlangK, {"k": 2, "theta": 3}),
+        (dists.ErlangK, {"k": 3, "theta": 2}),
+        (dists.ErlangK, {"k": 5, "theta": 0.5}),
+        (dists.ErlangK, {"k": 10, "theta": 1}),
+        (dists.ErlangK, {"k": 3, "theta": 2, "location": 5}),
+        (dists.ErlangK, {"k": 10, "theta": 1, "location": 9}),
+        (dists.Poisson, {"rate": 0.5}),
+        (dists.Poisson, {"rate": 3}),
+        (dists.Poisson, {"rate": 50}),
         # (dists.Hyperexponential)
     ],
     # Generate ID for test case - class get name, dict get converted to str
