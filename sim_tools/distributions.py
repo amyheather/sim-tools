@@ -86,6 +86,7 @@ Modeling and Analysis" (Law, 2007) where applicable.
 import inspect
 import json
 import math
+import warnings
 from collections.abc import Callable
 from typing import (
     Any,
@@ -99,6 +100,16 @@ import plotly.express as px
 import plotly.graph_objects as go
 from numpy.random import SeedSequence
 from numpy.typing import ArrayLike, NDArray
+from scipy.stats import (
+    CensoredData,
+    beta,
+    betaprime,
+    gamma,
+    invgamma,
+    norm,
+    triang,
+    weibull_min,
+)
 
 from sim_tools._validation import (
     is_integer,
@@ -707,8 +718,10 @@ class Exponential:
         Parameters
         ----------
         mean : float
-            The mean of the exponential distribution.
-            Must be positive.
+            The mean of the exponential distribution. If your data are time
+            between events, then this will be the average time between events,
+            which can be expressed as 1 / rate (λ). Otherwise, it is simply
+            the mean of the positive quantity being modelled. Must be positive.
 
         random_seed : Optional[Union[int, SeedSequence]], default=None
             A random seed or SeedSequence to reproduce samples. If None, a
@@ -743,6 +756,28 @@ class Exponential:
             - A numpy array of floats with shape determined by size parameter
         """
         return self.rng.exponential(self.mean, size=size)
+
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        Exponential
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+        mean = np.mean(data)
+        return cls(mean=mean, random_seed=random_seed)
 
 
 @DistributionRegistry.register()
@@ -900,6 +935,29 @@ class Lognormal:
         """
         return self.rng.lognormal(self.mu, self.sigma, size=size)
 
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        Lognormal
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+        mean = np.mean(data)
+        stdev = np.std(data)
+        return cls(mean=mean, stdev=stdev, random_seed=random_seed)
+
 
 @DistributionRegistry.register()
 class Normal:
@@ -983,7 +1041,7 @@ class Normal:
         Notes
         -----
         If a minimum value was specified during initialization, any samples
-        below this value will be truncated (set to the minimum value).
+        below this value will be set to the minimum value.
         """
         samples = self.rng.normal(self.mean, self.sigma, size=size)
 
@@ -993,10 +1051,59 @@ class Normal:
         if size is None:
             return max(self.minimum, samples)
 
-        # Truncate samples below minimum
+        # Replace values below minimum with the minimum
         below_min_idx = np.where(samples < self.minimum)[0]
         samples[below_min_idx] = self.minimum
         return samples
+
+    @classmethod
+    def fit(
+        cls,
+        data: ArrayLike,
+        minimum: float | None = None,
+        random_seed: int | SeedSequence | None = None,
+    ):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        minimum : Optional[float], default=None
+            If provided, truncates the distribution to this minimum value.
+            Any sampled values below this minimum will be set to this value.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        Normal
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+
+        if minimum is None:
+            return cls(
+                mean=np.mean(data),
+                sigma=np.std(data),
+                random_seed=random_seed,
+            )
+
+        # With minimum provided, the data is a sample with the lower tail
+        # replaced by identical values at the minimum. We don't just use the
+        # sample mean and standard deviation here, as the clipped points sit
+        # higher than the true values and reduce spread, so we use norm.fit()
+        # to estimate the appropriate mean and sigma. We mark the clipped
+        # points as censored so that the fit accounts for this
+        censored = data <= minimum
+        cdata = CensoredData(
+            uncensored=data[~censored],
+            left=data[censored],
+        )
+        mean, sigma = norm.fit(cdata)
+        return cls(mean=mean, sigma=sigma, minimum=minimum, random_seed=random_seed)
 
 
 @DistributionRegistry.register()
@@ -1064,6 +1171,29 @@ class Uniform:
             - A numpy array of floats with shape determined by size parameter
         """
         return self.rng.uniform(low=self.low, high=self.high, size=size)
+
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        Uniform
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+        minimum = np.min(data)
+        maximum = np.max(data)
+        return cls(low=minimum, high=maximum, random_seed=random_seed)
 
 
 @DistributionRegistry.register()
@@ -1140,6 +1270,34 @@ class Triangular:
             - A numpy array of floats with shape determined by size parameter
         """
         return self.rng.triangular(self.low, self.mode, self.high, size=size)
+
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Use scipy.stats.triang because finding mode of continuous data can
+        be tricky (e.g., if data has long floats or many decimal places).
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        Triangular
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+        c, loc, scale = triang.fit(data)
+        low = loc
+        mode = loc + c * scale
+        high = loc + scale
+        return cls(low=low, mode=mode, high=high, random_seed=random_seed)
 
 
 @DistributionRegistry.register()
@@ -1927,7 +2085,58 @@ class Erlang:
             - A single float when size is None
             - A numpy array of floats with shape determined by size parameter
         """
-        return self.rng.gamma(self.k, self.theta, size) + self.location
+        return self.rng.gamma(shape=self.k, scale=self.theta, size=size) + self.location
+
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        Erlang
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+
+        # We use gamma.fit as it's just the same as erlang.fit. The only
+        # difference is that erlang expects an integer shape, so will produce
+        # a warning message for non-integers - but it doesn't enforce integers
+
+        # Fit gamma distribution. Gamma allows any positive shape, but Erlang
+        # needs a whole number, so this fit is used just to find roughly
+        # which integer to pick
+        shape, _, _ = gamma.fit(data)
+
+        # Round shape to the nearest whole number, but don't allow it to be
+        # 0 which would break everything
+        k = max(1, round(shape))
+
+        # Fit again, but using the k integer. Now, we are just finding the
+        # best loc and scale for that integer shape
+        _, loc, scale = gamma.fit(data, f0=k)
+
+        # Our class requires location to be non-negative
+        if loc >= 0:
+            # Calculate the mean and standard deviation, before the offset
+            # (Can't use original mean/stdev as need to account for loc)
+            mean = k * scale
+            stdev = np.sqrt(k) * scale
+        else:
+            # With no offset, we can just use the data mean and stdev
+            mean = np.mean(data)
+            stdev = np.std(data)
+            loc = 0
+
+        return cls(mean=mean, stdev=stdev, location=loc, random_seed=random_seed)
 
 
 @DistributionRegistry.register()
@@ -2069,6 +2278,35 @@ class Weibull:
         """
         return self.scale * self.rng.weibull(self.shape, size) + self.location
 
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        Weibull
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+        shape, loc, scale = weibull_min.fit(data)
+
+        # Location must be non-negative. If the fit gives a negative value,
+        # refit with the location fixed at 0 so that shape and scale are
+        # estimated with no offset
+        if loc < 0:
+            shape, loc, scale = weibull_min.fit(data, floc=0)
+
+        return cls(alpha=shape, beta=scale, location=loc, random_seed=random_seed)
+
 
 @DistributionRegistry.register()
 class Gamma:
@@ -2202,6 +2440,50 @@ class Gamma:
         samples = self.rng.gamma(self.alpha, self.beta, size)
         return samples + self.location
 
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        Gamma
+            A new instance initialised with the fitted parameters.
+
+        Raises
+        ------
+        ValueError
+            If any value in `data` is zero or negative. Maximum likelihood
+            estimation for the gamma distribution involves the log of each
+            observation, so zeros cannot be used. Remove zeros or use a
+            distribution that allows them.
+        """
+        data = np.asarray(data, dtype=np.float64)
+
+        if np.any(data <= 0):
+            raise ValueError(
+                "Gamma.fit requires all data to be > 0. "
+                "Remove zeros or use a distribution that allows them."
+            )
+
+        shape, loc, scale = gamma.fit(data)
+
+        # Location must be non-negative. If the fit gives a negative value,
+        # refit with the location fixed at 0 so that alpha and beta are
+        # estimated with no offset
+        if loc < 0:
+            shape, loc, scale = gamma.fit(data, floc=0)
+
+        return cls(alpha=shape, beta=scale, location=loc, random_seed=random_seed)
+
 
 @DistributionRegistry.register()
 class Beta:
@@ -2300,6 +2582,91 @@ class Beta:
         """
         return self.min + (
             (self.max - self.min) * self.rng.beta(self.alpha1, self.alpha2, size)
+        )
+
+    @classmethod
+    def fit(
+        cls,
+        data: ArrayLike,
+        lower_bound: float = None,
+        upper_bound: float = None,
+        random_seed: int | SeedSequence | None = None,
+    ):
+        """
+        Create a distribution by fitting to observed data.
+
+        Ideally, supply the true bounds of the quantity. They are then held
+        fixed and only the two shape parameters are estimated, which is more
+        accurate and stable. If the bounds are omitted, all four parameters
+        (two shapes and two bounds) are estimated from the data. This is less
+        reliable, particularly when a shape parameter is below 1, and a
+        warning is raised.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        lower_bound : float, optional
+            Known lower bound. Must be given together with upper_bound.
+        upper_bound : float, optional
+            Known upper bound. Must be given together with lower_bound.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        Beta
+            A new instance initialised with the fitted parameters.
+
+        Warns
+        -----
+        UserWarning
+            If the bounds are not both provided, so they are estimated from
+            the data.
+        """
+        data = np.asarray(data, dtype=np.float64)
+
+        # When we have known bounds, we fix them (using floc and fscale) and
+        # then only estimate alpha1 and alpha2. This is the recommended way to
+        # fit beta in scipy. In the documentation, it warns that trying to
+        # estimate the bounds as well is unreliable as the problem is
+        # unbounded. In scipy, loc is the lower bound and scale is the width
+        # of the interval
+        if lower_bound is not None and upper_bound is not None:
+            a, b, loc, scale = beta.fit(
+                data, floc=lower_bound, fscale=upper_bound - lower_bound
+            )
+
+        # If bounds are unknown, estimate all four parameters. We can't use
+        # the minimum and maximum as the bounds as that will break fit -
+        # instead we set the bounds to slightly wider the data so every
+        # observation is strictly inside the bounds
+        else:
+            warnings.warn(
+                "Beta.fit() was not given both lower_bound and upper_bound, "
+                "so the bounds are being estimated from the data. This can be "
+                "unreliable, especially if a shape parameter is below 1. "
+                "Where possible, provide the actual limits of the quantity "
+                "(not the sample minimum and maximum).",
+                UserWarning,
+                stacklevel=2,
+            )
+
+            minimum = np.min(data)
+            data_range = np.max(data) - minimum
+            a, b, loc, scale = beta.fit(
+                data,
+                loc=minimum - 0.05 * data_range,
+                scale=1.1 * data_range,
+            )
+
+        return cls(
+            alpha1=a,
+            alpha2=b,
+            lower_bound=loc,
+            upper_bound=loc + scale,
+            random_seed=random_seed,
         )
 
 
@@ -2684,6 +3051,29 @@ class PearsonV:
         """
         return 1 / self.rng.gamma(self.alpha, 1 / self.beta, size)
 
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        PearsonV
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+        # Fixed floc=0 as sim-tools PearsonV doesn't accept location parameter
+        a, loc, scale = invgamma.fit(data, floc=0)
+        return cls(alpha=a, beta=scale, random_seed=random_seed)
+
 
 @DistributionRegistry.register()
 class PearsonVI:
@@ -2828,6 +3218,29 @@ class PearsonVI:
         x = self.rng.beta(self.alpha1, self.alpha2, size)
         return self.beta * x / (1 - x)
 
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        PearsonVI
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+        # Fixed floc=0 as sim-tools PearsonVI doesn't accept location parameter
+        a, b, loc, scale = betaprime.fit(data, floc=0)
+        return cls(alpha1=a, alpha2=b, beta=scale, random_seed=random_seed)
+
 
 @DistributionRegistry.register()
 class ErlangK:
@@ -2928,6 +3341,48 @@ class ErlangK:
         """
         return self.rng.gamma(self.k, self.theta, size) + self.location
 
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        ErlangK
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+
+        # We use gamma.fit as it's just the same as erlang.fit. The only
+        # difference is that erlang expects an integer shape, so will produce
+        # a warning message for non-integers - but it doesn't enforce integers
+
+        # Fit gamma distribution. Gamma allows any positive shape, but Erlang
+        # needs a whole number, so this fit is used just to find roughly
+        # which integer to pick
+        shape, _, _ = gamma.fit(data)
+
+        # Round shape to the nearest whole number, but don't allow it to be
+        # 0 which would break everything
+        k = max(1, round(shape))
+
+        # Fit again, but using the k integer. Now, we are just finding the
+        # best loc and scale for that integer shape
+        _, loc, scale = gamma.fit(data, f0=k)
+
+        # Our class requires location to be non-negative
+        loc = max(loc, 0)
+
+        return cls(k=k, theta=scale, location=loc, random_seed=random_seed)
+
 
 @DistributionRegistry.register()
 class Poisson:
@@ -2990,6 +3445,28 @@ class Poisson:
             - A numpy array of integers with shape determined by size parameter
         """
         return self.rng.poisson(self.rate, size)
+
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        Poisson
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+        mean = np.mean(data)
+        return cls(rate=mean, random_seed=random_seed)
 
 
 @DistributionRegistry.register()
@@ -3091,9 +3568,8 @@ class Hyperexponential:
         float
             Variance value: 2 * sum(p_i / λ_i^2) - [sum(p_i / λ_i)]^2
         """
-        mean = self.mean()
         second_moment = 2 * np.sum(self.probs / (self.rates**2))
-        return second_moment - mean**2
+        return second_moment - self.mean**2
 
     def sample(
         self, size: int | tuple[int, ...] | None = None

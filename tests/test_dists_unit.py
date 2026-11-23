@@ -292,3 +292,138 @@ def test_truncated_min(n, lower_bound):
     d1 = dists.Normal(10, 1, random_seed=SEED_1)
     d2 = dists.TruncatedDistribution(d1, lower_bound=lower_bound)
     assert min(d2.sample(size=n)) >= lower_bound
+
+
+@pytest.mark.parametrize(
+    "dist_class, params",
+    [
+        (dists.Exponential, {"mean": 5}),
+        (dists.Exponential, {"mean": 0.1}),
+        (dists.Exponential, {"mean": 1}),
+        (dists.Lognormal, {"mean": 6, "stdev": 3}),
+        (dists.Lognormal, {"mean": 1, "stdev": 5}),
+        (dists.Normal, {"mean": 6, "sigma": 3}),
+        (dists.Normal, {"mean": 6, "sigma": 3, "minimum": 0}),
+        (dists.Normal, {"mean": 6, "sigma": 3, "minimum": 2}),
+        (dists.Normal, {"mean": 6, "sigma": 3, "minimum": -1000}),
+        (dists.Normal, {"mean": 6, "sigma": 3, "minimum": 6}),
+        (dists.Uniform, {"low": 0, "high": 1}),
+        (dists.Uniform, {"low": -10, "high": 20}),
+        (dists.Uniform, {"low": 3.5, "high": 17}),
+        (dists.Triangular, {"low": -5, "mode": 0, "high": 5}),
+        (dists.Triangular, {"low": 2.9, "mode": 3, "high": 3.1}),
+        (dists.Triangular, {"low": 10, "mode": 15, "high": 20}),
+        (dists.Erlang, {"mean": 6, "stdev": 3, "location": 0}),
+        (dists.Erlang, {"mean": 6, "stdev": 3, "location": 9}),
+        (dists.Erlang, {"mean": 5, "stdev": 3}),
+        (dists.Weibull, {"alpha": 1, "beta": 0.5}),
+        (dists.Weibull, {"alpha": 2, "beta": 0.5}),
+        (dists.Weibull, {"alpha": 2, "beta": 0.5, "location": 0}),
+        (dists.Weibull, {"alpha": 2, "beta": 0.5, "location": 3}),
+        (dists.Gamma, {"alpha": 2, "beta": 0.5, "location": 0}),
+        (dists.Gamma, {"alpha": 2, "beta": 0.5, "location": 3}),
+        (dists.Beta, {"alpha1": 2, "alpha2": 2}),
+        (dists.Beta, {"alpha1": 2, "alpha2": 5}),
+        (dists.Beta, {"alpha1": 5, "alpha2": 2}),
+        (dists.Beta, {"alpha1": 1, "alpha2": 1}),
+        (dists.Beta, {"alpha1": 3, "alpha2": 0.5, "lower_bound": 0, "upper_bound": 1}),
+        (dists.Beta, {"alpha1": 4, "alpha2": 5}),
+        (dists.Beta, {"alpha1": 4, "alpha2": 5, "lower_bound": 1, "upper_bound": 2}),
+        (dists.Beta, {"alpha1": 4, "alpha2": 5, "lower_bound": -10, "upper_bound": 5}),
+        (
+            dists.Beta,
+            {"alpha1": 2, "alpha2": 5, "lower_bound": 100, "upper_bound": 500},
+        ),
+        (dists.Beta, {"alpha1": 0.5, "alpha2": 3, "lower_bound": 0, "upper_bound": 1}),
+        (dists.PearsonV, {"alpha": 2, "beta": 0.5}),
+        (dists.PearsonV, {"alpha": 5, "beta": 0.5}),
+        (dists.PearsonVI, {"alpha1": 4, "alpha2": 5, "beta": 0.5}),
+        (dists.ErlangK, {"k": 1, "theta": 4}),
+        (dists.ErlangK, {"k": 2, "theta": 3}),
+        (dists.ErlangK, {"k": 3, "theta": 2}),
+        (dists.ErlangK, {"k": 5, "theta": 0.5}),
+        (dists.ErlangK, {"k": 10, "theta": 1}),
+        (dists.ErlangK, {"k": 3, "theta": 2, "location": 5}),
+        (dists.ErlangK, {"k": 10, "theta": 1, "location": 9}),
+        (dists.Poisson, {"rate": 0.5}),
+        (dists.Poisson, {"rate": 3}),
+        (dists.Poisson, {"rate": 50}),
+    ],
+    # Generate ID for test case - class get name, dict get converted to str
+    ids=lambda v: v.__name__ if isinstance(v, type) else str(v),
+)
+def test_fit(dist_class, params):
+    """Generate large sample with known parameters, then check fitted match."""
+
+    # Generate large sample with known parameters
+    original = dist_class(**params, random_seed=101)
+    data = original.sample(100_000)
+
+    # Check estimated parameters from fit() match known parameters used
+    fit_kwargs = {}
+    if dist_class is dists.Beta and min(params["alpha1"], params["alpha2"]) < 1:
+        fit_kwargs = {
+            "lower_bound": params["lower_bound"],
+            "upper_bound": params["upper_bound"],
+        }
+    if dist_class is dists.Normal and "minimum" in params:
+        fit_kwargs = {"minimum": params["minimum"]}
+    fitted = dist_class.fit(data, **fit_kwargs)
+
+    for name, expected in params.items():
+        # Get the attribute from the fitted class
+        # If stored attributes have different name, use that
+        attribute = name
+        if dist_class is dists.Weibull:
+            if name == "alpha":
+                attribute = "shape"
+            if name == "beta":
+                attribute = "scale"
+        if dist_class is dists.Beta:
+            if name == "lower_bound":
+                attribute = "min"
+            if name == "upper_bound":
+                attribute = "max"
+        value = getattr(fitted, attribute)
+
+        # Relative tolerance is not helpful near 0, so use absolute instead
+        if expected == 0:
+            assert value == pytest.approx(expected, abs=0.3)
+        else:
+            assert value == pytest.approx(expected, rel=0.05)
+
+
+@pytest.mark.parametrize(
+    "dist_class, params",
+    [
+        (dists.Exponential, {"mean": 5}),
+        (dists.Lognormal, {"mean": 6, "stdev": 3}),
+        (dists.Normal, {"mean": 6, "sigma": 3}),
+        (dists.Uniform, {"low": 0, "high": 1}),
+        (dists.Triangular, {"low": -5, "mode": 0, "high": 5}),
+        (dists.Erlang, {"mean": 6, "stdev": 3, "location": 0}),
+        (dists.Weibull, {"alpha": 1, "beta": 0.5}),
+        (dists.Gamma, {"alpha": 2, "beta": 0.5, "location": 0}),
+        (dists.Beta, {"alpha1": 2, "alpha2": 2}),
+        (dists.PearsonV, {"alpha": 2, "beta": 0.5}),
+        (dists.PearsonVI, {"alpha1": 4, "alpha2": 5, "beta": 0.5}),
+        (dists.ErlangK, {"k": 1, "theta": 4}),
+        (dists.Poisson, {"rate": 0.5}),
+    ],
+    # Generate ID for test case - class get name, dict get converted to str
+    ids=lambda v: v.__name__ if isinstance(v, type) else str(v),
+)
+def test_fit_zeroes(dist_class, params):
+    """Check that fitting runs as expected with zeroes present."""
+    # Generate sample then set some values to 0
+    original = dist_class(**params, random_seed=101)
+    data = original.sample(100_000)
+    data[:10] = 0
+
+    if dist_class is dists.Gamma:
+        with pytest.raises(ValueError, match="> 0"):
+            dist_class.fit(data)
+    else:
+        fitted = dist_class.fit(data)
+        assert isinstance(fitted, dist_class)
+        assert np.all(np.isfinite(fitted.sample(1_000)))

@@ -3,7 +3,7 @@
 </h1>
 
 <p align="center">
-  <i align="center">Tools to support Discrete-Event Simulation (DES) and Monte-Carlo Simulation education and practice</i>
+  <b>Tools to support Discrete-Event Simulation (DES) and Monte-Carlo simulation education and practice</b>
 </p>
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/TomMonks/sim-tools/HEAD)
@@ -15,27 +15,19 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/release/python-360+/)
 
-`sim-tools` is being developed to support Discrete-Event Simulation (DES) and Monte-Carlo Simulation education and applied simulation research.  It is MIT licensed and freely available to practitioners, students and researchers via [PyPi](https://pypi.org/project/sim-tools/) and [conda-forge](https://anaconda.org/conda-forge/sim-tools)
-
-## Vision for sim-tools
-
- 1. Deliver high quality reliable code for DES and Monte-Carlo Simulation education and practice with full documentation.
- 2. Provide a simple to use Pythonic interface.
- 3. To improve the quality of simulation education using FOSS tools and encourage the use of best practice.
-
-## 👥 Authors
-
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-* Thomas Monks &nbsp;&nbsp; [![ORCID: Monks](https://img.shields.io/badge/ORCID-0000--0003--2631--4481-brightgreen)](https://orcid.org/0000-0003-2631-4481)
+`sim-tools` is a Python package that supports DES and Monte-Carlo simulation, in both teaching and applied research.  It is MIT licensed and freely available to practitioners, students and researchers via [PyPi](https://pypi.org/project/sim-tools/) and [conda-forge](https://anaconda.org/conda-forge/sim-tools).
 
-* Amy Heather &nbsp;&nbsp; [![ORCID: Heather](https://img.shields.io/badge/ORCID-0000--0002--6596--3479-brightgreen)](https://orcid.org/0000-0002-6596-3479)
+Vision for sim-tools:
 
-* Alison Harper &nbsp;&nbsp; [![ORCID: Harper](https://img.shields.io/badge/ORCID-0000--0001--5274--5037-brightgreen)](https://orcid.org/0000-0001-5274-5037)
+1. Deliver high quality reliable code for DES and Monte-Carlo Simulation education and practice with full documentation.
+2. Provide a simple to use Pythonic interface.
+3. To improve the quality of simulation education using FOSS tools and encourage the use of best practice.
 
-## Features:
+Features:
 
 1. Implementation of classic Optimisation via Simulation procedures such as KN, KN++, OBCA and OBCA-m
 2. Theoretical and empirical distributions module that includes classes that encapsulate a random number stream, seed, and distribution parameters.
@@ -43,6 +35,14 @@
 4. Implementation of Thinning to sample from Non-stationary Poisson Processes (time-dependent) in a DES.
 5. Automatic selection of the number of replications to run via the Replications Algorithm.
 6. EXPERIMENTAL: model trace functionality to support debugging of simulation models.
+
+Learn how to use sim-tools:
+
+* Online documentation: https://sim-tools.github.io/sim-tools
+* Introduction to DES in python: https://health-data-science-or.github.io/simpy-streamlit-tutorial/
+* Online tutorial: optimisation Via Simulation [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sim-tools/sim-tools/blob/master/docs/02_ovs/03_sw21_tutorial.ipynb)
+
+<br>
 
 ## Installation
 
@@ -70,15 +70,17 @@ mamba install sim-tools
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sim-tools/sim-tools/HEAD)
 
-
-## Learn how to use `sim-tools`
-
-* Online documentation: https://sim-tools.github.io/sim-tools
-* Introduction to DES in python: https://health-data-science-or.github.io/simpy-streamlit-tutorial/
+<br>
 
 ## Citation
 
-If you use sim-tools for research, a practical report, education or any reason please include the following citation.
+`sim-tools` has been created and maintained by:
+
+* Thomas Monks &nbsp;&nbsp; [![ORCID: Monks](https://img.shields.io/badge/ORCID-0000--0003--2631--4481-brightgreen)](https://orcid.org/0000-0003-2631-4481)
+* Amy Heather &nbsp;&nbsp; [![ORCID: Heather](https://img.shields.io/badge/ORCID-0000--0002--6596--3479-brightgreen)](https://orcid.org/0000-0002-6596-3479)
+* Alison Harper &nbsp;&nbsp; [![ORCID: Harper](https://img.shields.io/badge/ORCID-0000--0001--5274--5037-brightgreen)](https://orcid.org/0000-0001-5274-5037)
+
+If you use `sim-tools` for research, a practical report, education or any reason please include the following citation.
 
 > Monks, T., Heather, A., Harper, A. (2025). sim-tools: fundamental tools to support the simulation process in python. `Zenodo`. https://doi.org/10.5281/zenodo.4553641.
 
@@ -93,18 +95,13 @@ If you use sim-tools for research, a practical report, education or any reason p
 }
 ```
 
-# Online Tutorials
+<br>
 
-* Optimisation Via Simulation [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sim-tools/sim-tools/blob/master/docs/02_ovs/03_sw21_tutorial.ipynb)
+## Contributors
 
+**All contributions are welcome!** See `CONTRIBUTING.md` for how to get involved. This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification ([emoji key](https://allcontributors.org/docs/en/emoji-key)).
 
-## Contributing to sim-tools
-
-**All contributions are welcome!** Please see `CONTRIBUTING.md` for instructions on how to contribute.
-
-## Contributors ✨
-
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+Thanks to the following individuals for their contributions to `sim-tools`:
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
@@ -125,4 +122,10 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+<br>
+
+## Generative AI
+
+**The package code was written by the authors, not generated by AI**. For context, most of `sim-tools` was written before generative AI tools became widely used. However, some docstrings have been improved using generative AI. The authors reviewed all of them.
+
+**Policy for contributors:** We want to keep generative AI use in `sim-tools` to a minimum. Please do not submit AI-generated code. Contributions should be code you wrote and understand. Light use of AI (e.g., to fix grammar or improve docstrings) is acceptable. Please state in your pull request if AI was used.
