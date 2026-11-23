@@ -100,7 +100,16 @@ import plotly.express as px
 import plotly.graph_objects as go
 from numpy.random import SeedSequence
 from numpy.typing import ArrayLike, NDArray
-from scipy.stats import beta, betaprime, gamma, invgamma, triang, weibull_min
+from scipy.stats import (
+    CensoredData,
+    beta,
+    betaprime,
+    gamma,
+    invgamma,
+    norm,
+    triang,
+    weibull_min,
+)
 
 from sim_tools._validation import (
     is_integer,
@@ -1032,7 +1041,7 @@ class Normal:
         Notes
         -----
         If a minimum value was specified during initialization, any samples
-        below this value will be truncated (set to the minimum value).
+        below this value will be set to the minimum value.
         """
         samples = self.rng.normal(self.mean, self.sigma, size=size)
 
@@ -1042,7 +1051,7 @@ class Normal:
         if size is None:
             return max(self.minimum, samples)
 
-        # Truncate samples below minimum
+        # Replace values below minimum with the minimum
         below_min_idx = np.where(samples < self.minimum)[0]
         samples[below_min_idx] = self.minimum
         return samples
@@ -1074,11 +1083,27 @@ class Normal:
             A new instance initialised with the fitted parameters.
         """
         data = np.asarray(data, dtype=np.float64)
-        mean = np.mean(data)
-        stdev = np.std(data)
-        if minimum is not None:
-            return cls(mean=mean, sigma=stdev, minimum=minimum, random_seed=random_seed)
-        return cls(mean=mean, sigma=stdev, random_seed=random_seed)
+
+        if minimum is None:
+            return cls(
+                mean=np.mean(data),
+                sigma=np.std(data),
+                random_seed=random_seed,
+            )
+
+        # With minimum provided, the data is a sample with the lower tail
+        # replaced by identical values at the minimum. We don't just use the
+        # sample mean and standard deviation here, as the clipped points sit
+        # higher than the true values and reduce spread, so we use norm.fit()
+        # to estimate the appropriate mean and sigma. We mark the clipped
+        # points as censored so that the fit accounts for this
+        censored = data <= minimum
+        cdata = CensoredData(
+            uncensored=data[~censored],
+            left=data[censored],
+        )
+        mean, sigma = norm.fit(cdata)
+        return cls(mean=mean, sigma=sigma, minimum=minimum, random_seed=random_seed)
 
 
 @DistributionRegistry.register()
