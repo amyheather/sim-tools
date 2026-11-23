@@ -2114,7 +2114,7 @@ class Erlang:
         # Fit gamma distribution. Gamma allows any positive shape, but Erlang
         # needs a whole number, so this fit is used just to find roughly
         # which integer to pick
-        shape, loc, scale = gamma.fit(data)
+        shape, _, _ = gamma.fit(data)
 
         # Round shape to the nearest whole number, but don't allow it to be
         # 0 which would break everything
@@ -3318,6 +3318,48 @@ class ErlangK:
             - A numpy array of floats with shape determined by size parameter
         """
         return self.rng.gamma(self.k, self.theta, size) + self.location
+
+    @classmethod
+    def fit(cls, data: ArrayLike, random_seed: int | SeedSequence | None = None):
+        """
+        Create a distribution by fitting to observed data.
+
+        Parameters
+        ----------
+        data : ArrayLike
+            Observed data to fit distribution to.
+        random_seed : Optional[Union[int, SeedSequence]], default=None
+            A random seed or SeedSequence to reproduce samples. If None, a
+            unique sample sequence is generated.
+
+        Returns
+        -------
+        ErlangK
+            A new instance initialised with the fitted parameters.
+        """
+        data = np.asarray(data, dtype=np.float64)
+
+        # We use gamma.fit as it's just the same as erlang.fit. The only
+        # difference is that erlang expects an integer shape, so will produce
+        # a warning message for non-integers - but it doesn't enforce integers
+
+        # Fit gamma distribution. Gamma allows any positive shape, but Erlang
+        # needs a whole number, so this fit is used just to find roughly
+        # which integer to pick
+        shape, _, _ = gamma.fit(data)
+
+        # Round shape to the nearest whole number, but don't allow it to be
+        # 0 which would break everything
+        k = max(1, round(shape))
+
+        # Fit again, but using the k integer. Now, we are just finding the
+        # best loc and scale for that integer shape
+        _, loc, scale = gamma.fit(data, f0=k)
+
+        # Our class requires location to be non-negative
+        loc = max(loc, 0)
+
+        return cls(k=k, theta=scale, location=loc, random_seed=random_seed)
 
 
 @DistributionRegistry.register()
