@@ -298,17 +298,26 @@ def test_truncated_min(n, lower_bound):
     "dist_class, params",
     [
         (dists.Exponential, {"mean": 5}),
+        (dists.Exponential, {"mean": 0.1}),
+        (dists.Exponential, {"mean": 1}),
         (dists.Lognormal, {"mean": 6, "stdev": 3}),
+        (dists.Lognormal, {"mean": 1, "stdev": 5}),
         (dists.Normal, {"mean": 6, "sigma": 3}),
         (dists.Normal, {"mean": 6, "sigma": 3, "minimum": 0}),
         (dists.Normal, {"mean": 6, "sigma": 3, "minimum": 2}),
+        (dists.Normal, {"mean": 6, "sigma": 3, "minimum": -1000}),
+        (dists.Normal, {"mean": 6, "sigma": 3, "minimum": 6}),
         (dists.Uniform, {"low": 0, "high": 1}),
         (dists.Uniform, {"low": -10, "high": 20}),
         (dists.Uniform, {"low": 3.5, "high": 17}),
         (dists.Triangular, {"low": -5, "mode": 0, "high": 5}),
+        (dists.Triangular, {"low": 2.9, "mode": 3, "high": 3.1}),
         (dists.Triangular, {"low": 10, "mode": 15, "high": 20}),
         (dists.Erlang, {"mean": 6, "stdev": 3, "location": 0}),
         (dists.Erlang, {"mean": 6, "stdev": 3, "location": 9}),
+        (dists.Erlang, {"mean": 5, "stdev": 3}),
+        (dists.Weibull, {"alpha": 1, "beta": 0.5}),
+        (dists.Weibull, {"alpha": 2, "beta": 0.5}),
         (dists.Weibull, {"alpha": 2, "beta": 0.5, "location": 0}),
         (dists.Weibull, {"alpha": 2, "beta": 0.5, "location": 3}),
         (dists.Gamma, {"alpha": 2, "beta": 0.5, "location": 0}),
@@ -323,21 +332,9 @@ def test_truncated_min(n, lower_bound):
         (dists.Beta, {"alpha1": 4, "alpha2": 5, "lower_bound": -10, "upper_bound": 5}),
         (dists.Beta, {"alpha1": 2, "alpha2": 5, "lower_bound": 100, "upper_bound": 500}),
         (dists.Beta, {"alpha1": 0.5, "alpha2": 3, "lower_bound": 0, "upper_bound": 1}),
-        (
-            dists.PearsonV,
-            {
-                "alpha": 2,
-                "beta": 0.5,
-            },
-        ),
-        (
-            dists.PearsonVI,
-            {
-                "alpha1": 4,
-                "alpha2": 5,
-                "beta": 0.5,
-            },
-        ),
+        (dists.PearsonV, {"alpha": 2, "beta": 0.5}),
+        (dists.PearsonV, {"alpha": 5, "beta": 0.5}),
+        (dists.PearsonVI, {"alpha1": 4, "alpha2": 5, "beta": 0.5}),
         # (dists.ErlangK)
         # (dists.Poisson)
         # (dists.Hyperexponential)
