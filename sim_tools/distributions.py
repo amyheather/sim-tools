@@ -122,6 +122,7 @@ from sim_tools._validation import (
     is_probability,
     is_probability_vector,
     validate,
+    validate_fit_data,
 )
 
 T = TypeVar("T", bound=type)
@@ -793,7 +794,7 @@ class Exponential:
         Exponential
             A new instance initialised with the fitted parameters.
         """
-        data = np.asarray(data, dtype=np.float64)
+        data = validate_fit_data(data)
         mean = np.mean(data)
         return cls(mean=mean, random_seed=random_seed)
 
@@ -990,7 +991,7 @@ class Lognormal:
         Lognormal
             A new instance initialised with the fitted parameters.
         """
-        data = np.asarray(data, dtype=np.float64)
+        data = validate_fit_data(data)
         mean = np.mean(data)
         stdev = np.std(data)
         return cls(mean=mean, stdev=stdev, random_seed=random_seed)
@@ -1134,7 +1135,7 @@ class Normal:
         Normal
             A new instance initialised with the fitted parameters.
         """
-        data = np.asarray(data, dtype=np.float64)
+        data = validate_fit_data(data)
 
         if minimum is None:
             return cls(
@@ -1261,7 +1262,7 @@ class Uniform:
         Uniform
             A new instance initialised with the fitted parameters.
         """
-        data = np.asarray(data, dtype=np.float64)
+        data = validate_fit_data(data)
         minimum = np.min(data)
         maximum = np.max(data)
         return cls(low=minimum, high=maximum, random_seed=random_seed)
@@ -1383,7 +1384,7 @@ class Triangular:
         Triangular
             A new instance initialised with the fitted parameters.
         """
-        data = np.asarray(data, dtype=np.float64)
+        data = validate_fit_data(data)
         c, loc, scale = triang.fit(data)
         low = loc
         mode = loc + c * scale
@@ -2211,7 +2212,7 @@ class Erlang:
         Erlang
             A new instance initialised with the fitted parameters.
         """
-        data = np.asarray(data, dtype=np.float64)
+        data = validate_fit_data(data)
 
         # We use gamma.fit as it's just the same as erlang.fit. The only
         # difference is that erlang expects an integer shape, so will produce
@@ -2417,7 +2418,7 @@ class Weibull:
         Weibull
             A new instance initialised with the fitted parameters.
         """
-        data = np.asarray(data, dtype=np.float64)
+        data = validate_fit_data(data)
         shape, loc, scale = weibull_min.fit(data)
 
         # Location must be non-negative. If the fit gives a negative value,
@@ -2602,7 +2603,7 @@ class Gamma:
             observation, so zeros cannot be used. Remove zeros or use a
             distribution that allows them.
         """
-        data = np.asarray(data, dtype=np.float64)
+        data = validate_fit_data(data)
 
         if np.any(data <= 0):
             raise ValueError(
@@ -2777,7 +2778,7 @@ class Beta:
             If the bounds are not both provided, so they are estimated from
             the data.
         """
-        data = np.asarray(data, dtype=np.float64)
+        data = validate_fit_data(data)
 
         if (lower_bound is None) != (upper_bound is None):
             raise ValueError("lower_bound and upper_bound must be provided together.")
@@ -3252,7 +3253,7 @@ class PearsonV:
         PearsonV
             A new instance initialised with the fitted parameters.
         """
-        data = np.asarray(data, dtype=np.float64)
+        data = validate_fit_data(data)
         # Fixed floc=0 as sim-tools PearsonV doesn't accept location parameter
         a, loc, scale = invgamma.fit(data, floc=0)
         return cls(alpha=a, beta=scale, random_seed=random_seed)
@@ -3436,7 +3437,7 @@ class PearsonVI:
         PearsonVI
             A new instance initialised with the fitted parameters.
         """
-        data = np.asarray(data, dtype=np.float64)
+        data = validate_fit_data(data)
         # Fixed floc=0 as sim-tools PearsonVI doesn't accept location parameter
         a, b, loc, scale = betaprime.fit(data, floc=0)
         return cls(alpha1=a, alpha2=b, beta=scale, random_seed=random_seed)
@@ -3575,7 +3576,7 @@ class ErlangK:
         ErlangK
             A new instance initialised with the fitted parameters.
         """
-        data = np.asarray(data, dtype=np.float64)
+        data = validate_fit_data(data)
 
         # We use gamma.fit as it's just the same as erlang.fit. The only
         # difference is that erlang expects an integer shape, so will produce
@@ -3700,7 +3701,7 @@ class Poisson:
         Poisson
             A new instance initialised with the fitted parameters.
         """
-        data = np.asarray(data, dtype=np.float64)
+        data = validate_fit_data(data)
         mean = np.mean(data)
         return cls(rate=mean, random_seed=random_seed)
 

@@ -6,6 +6,11 @@ input parameters for sim-tools code. Each validator follows the
 Single Responsibility Principle, checking exactly one constraint, and can be
 combined with others through the `validate()` function.
 
+The module also provides validate_fit_data(), a standalone helper that
+converts observed data to a NumPy array and checks common fitting
+requirements. Unlike the composable validators, it returns the validated
+data and is called directly.
+
 Examples
 --------
 >>> from validation import validate, is_numeric, is_positive
@@ -30,6 +35,11 @@ is_non_negative: Checks if the value is >= 0.0
 is_ordered_pair: Checks that low < high
 is_ordered_triplet: Checks that low < middle < high
 
+Fitting Data Validation
+-----------------------
+validate_fit_data : Converts data to a one-dimensional float64 array and
+    checks that it contains at least two observations and no NaN or
+    infinite values.
 
 Notes
 -----
@@ -42,6 +52,7 @@ from collections.abc import Callable
 from typing import Any
 
 import numpy as np
+from numpy.typing import ArrayLike, NDArray
 
 # Type for validator functions
 ValidatorFunc = Callable[[Any, str], None]
@@ -128,3 +139,36 @@ def is_positive_array(value: np.ndarray, name: str) -> None:
         raise ValueError(f"{name} must be a 1D array")
     if np.any(value <= 0):
         raise ValueError(f"All elements in {name} must be positive (>0)")
+
+
+def validate_fit_data(data: ArrayLike) -> NDArray[np.float64]:
+    """Convert observed data to a float array and validate it for fitting.
+
+    Parameters
+    ----------
+    data : ArrayLike
+        Observed data to fit a distribution to.
+
+    Returns
+    -------
+    numpy.ndarray
+        A one-dimensional float64 array containing at least two finite
+        observations.
+
+    Raises
+    ------
+    TypeError
+        If the input contains objects that cannot be converted to floats.
+    ValueError
+        If there are any validation issues for the data.
+    """
+    data = np.asarray(data, dtype=np.float64)
+
+    if data.ndim != 1:
+        raise ValueError("Data must be one-dimensional.")
+    if data.size < 2:
+        raise ValueError("Data must contain at least two observations.")
+    if not np.isfinite(data).all():
+        raise ValueError("Data must not contain NaN or infinite values.")
+
+    return data
