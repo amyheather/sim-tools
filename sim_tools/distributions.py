@@ -2783,15 +2783,16 @@ class Beta:
         if (lower_bound is None) != (upper_bound is None):
             raise ValueError("lower_bound and upper_bound must be provided together.")
 
-        validate(lower_bound, "lower_bound", is_numeric)
-        validate(upper_bound, "upper_bound", is_numeric)
-        is_ordered_pair(lower_bound, upper_bound, "lower_bound", "upper_bound")
-
-        if np.any((data <= lower_bound) | (data >= upper_bound)):
-            raise ValueError(
-                "Beta.fit requires all data to be strictly between "
-                "lower_bound and upper_bound when bounds are fixed."
-            )
+        # Validation of the provided boundaries
+        if lower_bound is not None:
+            validate(lower_bound, "lower_bound", is_numeric)
+            validate(upper_bound, "upper_bound", is_numeric)
+            is_ordered_pair(lower_bound, upper_bound, "lower_bound", "upper_bound")
+            if np.any((data <= lower_bound) | (data >= upper_bound)):
+                raise ValueError(
+                    "Beta.fit requires all data to be strictly between "
+                    "lower_bound and upper_bound when bounds are fixed."
+                )
 
         # When we have known bounds, we fix them (using floc and fscale) and
         # then only estimate alpha1 and alpha2. This is the recommended way to
