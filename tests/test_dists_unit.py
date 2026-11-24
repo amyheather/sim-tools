@@ -427,3 +427,30 @@ def test_fit_zeroes(dist_class, params):
         fitted = dist_class.fit(data)
         assert isinstance(fitted, dist_class)
         assert np.all(np.isfinite(fitted.sample(1_000)))
+
+
+@pytest.mark.parametrize(
+    "dist_class, params",
+    [
+        (dists.Exponential, {"mean": 5}),
+        (dists.Lognormal, {"mean": 6, "stdev": 3}),
+        (dists.Normal, {"mean": 6, "sigma": 3, "minimum": None}),
+        (dists.Uniform, {"low": 0, "high": 1}),
+        (dists.Triangular, {"low": -5, "mode": 0, "high": 5}),
+        (dists.Erlang, {"mean": 6, "stdev": 3, "location": 0}),
+        (dists.Weibull, {"alpha": 1, "beta": 0.5, "location": 0}),
+        (dists.Gamma, {"alpha": 2, "beta": 0.5, "location": 0}),
+        (dists.Beta, {"alpha1": 2, "alpha2": 5, "lower_bound": -3, "upper_bound": 10}),
+        (dists.PearsonV, {"alpha": 2, "beta": 0.5}),
+        (dists.PearsonVI, {"alpha1": 4, "alpha2": 5, "beta": 0.5}),
+        (dists.ErlangK, {"k": 1, "theta": 4, "location": 0}),
+        (dists.Poisson, {"rate": 0.5}),
+    ],
+)
+def test_get_params(dist_class, params):
+    """Check parameters use constructor names and reconstruct the distribution."""
+    # Create instance of the distribution
+    original = dist_class(**params, random_seed=202)
+    # Call get_params() and check it matches the params we used
+    returned_params = original.get_params()
+    assert returned_params == params

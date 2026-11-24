@@ -731,8 +731,26 @@ class Exponential:
         self.rng = np.random.default_rng(random_seed)
         self.mean = mean
 
-    def __repr__(self):
-        return f"Exponential(mean={self.mean})"
+    def __repr__(self) -> str:
+        """Return the class name and constructor parameters as a string."""
+        params = ", ".join(
+            f"{name}={value}" for name, value in self.get_params().items()
+        )
+        return f"{type(self).__name__}({params})"
+
+    def get_params(self) -> dict[str, float]:
+        """
+        Return distribution parameters using constructor argument names.
+
+        Returns
+        -------
+        dict[str, float]
+            Parameters keyed by their constructor argument names. Excludes
+            the random seed and random number generator state.
+        """
+        return {
+            "mean": self.mean,
+        }
 
     def sample(
         self, size: int | tuple[int, ...] | None = None
@@ -881,8 +899,27 @@ class Lognormal:
         self.mean = mean
         self.stdev = stdev
 
-    def __repr__(self):
-        return f"Lognormal(mean={self.mean}, stdev={self.stdev})"
+    def __repr__(self) -> str:
+        """Return the class name and constructor parameters as a string."""
+        params = ", ".join(
+            f"{name}={value}" for name, value in self.get_params().items()
+        )
+        return f"{type(self).__name__}({params})"
+
+    def get_params(self) -> dict[str, float]:
+        """
+        Return distribution parameters using constructor argument names.
+
+        Returns
+        -------
+        dict[str, float]
+            Parameters keyed by their constructor argument names. Excludes
+            the random seed and random number generator state.
+        """
+        return {
+            "mean": self.mean,
+            "stdev": self.stdev,
+        }
 
     def normal_moments_from_lognormal(self, m: float, v: float) -> tuple[float, float]:
         """
@@ -1009,13 +1046,28 @@ class Normal:
         self.sigma = sigma
         self.minimum = minimum
 
-    def __repr__(self):
-        if self.minimum is None:
-            return f"Normal(mean={self.mean}, sigma={self.sigma})"
-        return (
-            f"Normal(mean={self.mean}, sigma={self.sigma}, "
-            + f"minimum={self.minimum})"
+    def __repr__(self) -> str:
+        """Return the class name and constructor parameters as a string."""
+        params = ", ".join(
+            f"{name}={value}" for name, value in self.get_params().items()
         )
+        return f"{type(self).__name__}({params})"
+
+    def get_params(self) -> dict[str, float]:
+        """
+        Return distribution parameters using constructor argument names.
+
+        Returns
+        -------
+        dict[str, float]
+            Parameters keyed by their constructor argument names. Excludes
+            the random seed and random number generator state.
+        """
+        return {
+            "mean": self.mean,
+            "sigma": self.sigma,
+            "minimum": self.minimum,
+        }
 
     def sample(
         self, size: int | tuple[int, ...] | None = None
@@ -1146,8 +1198,27 @@ class Uniform:
         self.low = low
         self.high = high
 
-    def __repr__(self):
-        return f"Uniform(low={self.low}, high={self.high})"
+    def __repr__(self) -> str:
+        """Return the class name and constructor parameters as a string."""
+        params = ", ".join(
+            f"{name}={value}" for name, value in self.get_params().items()
+        )
+        return f"{type(self).__name__}({params})"
+
+    def get_params(self) -> dict[str, float]:
+        """
+        Return distribution parameters using constructor argument names.
+
+        Returns
+        -------
+        dict[str, float]
+            Parameters keyed by their constructor argument names. Excludes
+            the random seed and random number generator state.
+        """
+        return {
+            "low": self.low,
+            "high": self.high,
+        }
 
     def sample(
         self, size: int | tuple[int, ...] | None = None
@@ -1245,8 +1316,28 @@ class Triangular:
         self.high = high
         self.mode = mode
 
-    def __repr__(self):
-        return f"Triangular(low={self.low}, mode={self.mode}, high={self.high})"
+    def __repr__(self) -> str:
+        """Return the class name and constructor parameters as a string."""
+        params = ", ".join(
+            f"{name}={value}" for name, value in self.get_params().items()
+        )
+        return f"{type(self).__name__}({params})"
+
+    def get_params(self) -> dict[str, float]:
+        """
+        Return distribution parameters using constructor argument names.
+
+        Returns
+        -------
+        dict[str, float]
+            Parameters keyed by their constructor argument names. Excludes
+            the random seed and random number generator state.
+        """
+        return {
+            "low": self.low,
+            "mode": self.mode,
+            "high": self.high,
+        }
 
     def sample(
         self, size: int | tuple[int, ...] | None = None
@@ -2056,13 +2147,28 @@ class Erlang:
         # theta also referred to as scale
         self.theta = mean / self.k
 
-    def __repr__(self):
-        if self.location == 0.0:
-            return f"Erlang(mean={self.mean}, stdev={self.stdev})"
-        return (
-            f"Erlang(mean={self.mean}, stdev={self.stdev}, "
-            + f"location={self.location})"
+    def __repr__(self) -> str:
+        """Return the class name and constructor parameters as a string."""
+        params = ", ".join(
+            f"{name}={value}" for name, value in self.get_params().items()
         )
+        return f"{type(self).__name__}({params})"
+
+    def get_params(self) -> dict[str, float]:
+        """
+        Return distribution parameters using constructor argument names.
+
+        Returns
+        -------
+        dict[str, float]
+            Parameters keyed by their constructor argument names. Excludes
+            the random seed and random number generator state.
+        """
+        return {
+            "mean": self.mean,
+            "stdev": self.stdev,
+            "location": self.location,
+        }
 
     def sample(
         self, size: int | tuple[int, ...] | None = None
@@ -2215,13 +2321,28 @@ class Weibull:
         self.scale = beta
         self.location = location
 
-    def __repr__(self):
-        if self.location == 0.0:
-            return f"Weibull(alpha={self.shape}, beta={self.scale})"
-        return (
-            f"Weibull(alpha={self.shape}, beta={self.scale}, "
-            + f"location={self.location})"
+    def __repr__(self) -> str:
+        """Return the class name and constructor parameters as a string."""
+        params = ", ".join(
+            f"{name}={value}" for name, value in self.get_params().items()
         )
+        return f"{type(self).__name__}({params})"
+
+    def get_params(self) -> dict[str, float]:
+        """
+        Return distribution parameters using constructor argument names.
+
+        Returns
+        -------
+        dict[str, float]
+            Parameters keyed by their constructor argument names. Excludes
+            the random seed and random number generator state.
+        """
+        return {
+            "alpha": self.shape,
+            "beta": self.scale,
+            "location": self.location,
+        }
 
     @property
     def mean(self) -> float:
@@ -2359,13 +2480,28 @@ class Gamma:
         self.beta = beta  # scale
         self.location = location
 
-    def __repr__(self):
-        if self.location == 0.0:
-            return f"Gamma(alpha={self.alpha}, beta={self.beta})"
-        return (
-            f"Gamma(alpha={self.alpha}, beta={self.beta}, "
-            + f"location={self.location})"
+    def __repr__(self) -> str:
+        """Return the class name and constructor parameters as a string."""
+        params = ", ".join(
+            f"{name}={value}" for name, value in self.get_params().items()
         )
+        return f"{type(self).__name__}({params})"
+
+    def get_params(self) -> dict[str, float]:
+        """
+        Return distribution parameters using constructor argument names.
+
+        Returns
+        -------
+        dict[str, float]
+            Parameters keyed by their constructor argument names. Excludes
+            the random seed and random number generator state.
+        """
+        return {
+            "alpha": self.alpha,
+            "beta": self.beta,
+            "location": self.location,
+        }
 
     @property
     def mean(self) -> float:
@@ -2491,7 +2627,8 @@ class Beta:
     Beta distribution implementation.
 
     A flexible continuous probability distribution defined on the interval
-    [0,1], which can be rescaled to any arbitrary interval [min, max].
+    [0,1], which can be rescaled to any arbitrary interval
+    [lower_bound, upper_bound].
 
     As defined in Simulation Modeling and Analysis (Law, 2007).
 
@@ -2551,13 +2688,29 @@ class Beta:
         self.min = lower_bound
         self.max = upper_bound
 
-    def __repr__(self):
-        if self.min == 0.0 and self.max == 1.0:
-            return f"Beta(alpha1={self.alpha1}, alpha2={self.alpha2})"
-        return (
-            f"Beta(alpha1={self.alpha1}, alpha2={self.alpha2}, "
-            + f"lower_bound={self.min}, upper_bound={self.max})"
+    def __repr__(self) -> str:
+        """Return the class name and constructor parameters as a string."""
+        params = ", ".join(
+            f"{name}={value}" for name, value in self.get_params().items()
         )
+        return f"{type(self).__name__}({params})"
+
+    def get_params(self) -> dict[str, float]:
+        """
+        Return distribution parameters using constructor argument names.
+
+        Returns
+        -------
+        dict[str, float]
+            Parameters keyed by their constructor argument names. Excludes
+            the random seed and random number generator state.
+        """
+        return {
+            "alpha1": self.alpha1,
+            "alpha2": self.alpha2,
+            "lower_bound": self.min,
+            "upper_bound": self.max,
+        }
 
     def sample(
         self, size: int | tuple[int, ...] | None = None
@@ -2588,19 +2741,18 @@ class Beta:
     def fit(
         cls,
         data: ArrayLike,
-        lower_bound: float = None,
-        upper_bound: float = None,
+        lower_bound: float | None = None,
+        upper_bound: float | None = None,
         random_seed: int | SeedSequence | None = None,
     ):
         """
         Create a distribution by fitting to observed data.
 
         Ideally, supply the true bounds of the quantity. They are then held
-        fixed and only the two shape parameters are estimated, which is more
-        accurate and stable. If the bounds are omitted, all four parameters
-        (two shapes and two bounds) are estimated from the data. This is less
-        reliable, particularly when a shape parameter is below 1, and a
-        warning is raised.
+        fixed and only the two shape parameters are estimated. If the bounds
+        are omitted, all four parameters (two shapes and two bounds) are
+        estimated from the data. This is less reliable, particularly when a
+        shape parameter is below 1, and a warning is raised.
 
         Parameters
         ----------
@@ -2627,25 +2779,37 @@ class Beta:
         """
         data = np.asarray(data, dtype=np.float64)
 
+        if (lower_bound is None) != (upper_bound is None):
+            raise ValueError("lower_bound and upper_bound must be provided together.")
+
+        validate(lower_bound, "lower_bound", is_numeric)
+        validate(upper_bound, "upper_bound", is_numeric)
+        is_ordered_pair(lower_bound, upper_bound, "lower_bound", "upper_bound")
+
+        if np.any((data <= lower_bound) | (data >= upper_bound)):
+            raise ValueError(
+                "Beta.fit requires all data to be strictly between "
+                "lower_bound and upper_bound when bounds are fixed."
+            )
+
         # When we have known bounds, we fix them (using floc and fscale) and
         # then only estimate alpha1 and alpha2. This is the recommended way to
         # fit beta in scipy. In the documentation, it warns that trying to
         # estimate the bounds as well is unreliable as the problem is
         # unbounded. In scipy, loc is the lower bound and scale is the width
         # of the interval
-        if lower_bound is not None and upper_bound is not None:
+        if lower_bound is not None:
             a, b, loc, scale = beta.fit(
                 data, floc=lower_bound, fscale=upper_bound - lower_bound
             )
 
-        # If bounds are unknown, estimate all four parameters. We can't use
-        # the minimum and maximum as the bounds as that will break fit -
-        # instead we set the bounds to slightly wider the data so every
-        # observation is strictly inside the bounds
+        # If bounds are unknown, estimate all four parameters, starting with
+        # an interval slightly wider than the observed data. These are initial
+        # guesses, not fixed bounds
         else:
             warnings.warn(
-                "Beta.fit() was not given both lower_bound and upper_bound, "
-                "so the bounds are being estimated from the data. This can be "
+                "Beta.fit() was not provided lower_bound and upper_bound "
+                "so these are being estimated from the data. This can be "
                 "unreliable, especially if a shape parameter is below 1. "
                 "Where possible, provide the actual limits of the quantity "
                 "(not the sample minimum and maximum).",
@@ -2985,8 +3149,27 @@ class PearsonV:
         self.alpha = alpha  # shape
         self.beta = beta  # scale
 
-    def __repr__(self):
-        return f"PearsonV(alpha={self.alpha}, beta={self.beta})"
+    def __repr__(self) -> str:
+        """Return the class name and constructor parameters as a string."""
+        params = ", ".join(
+            f"{name}={value}" for name, value in self.get_params().items()
+        )
+        return f"{type(self).__name__}({params})"
+
+    def get_params(self) -> dict[str, float]:
+        """
+        Return distribution parameters using constructor argument names.
+
+        Returns
+        -------
+        dict[str, float]
+            Parameters keyed by their constructor argument names. Excludes
+            the random seed and random number generator state.
+        """
+        return {
+            "alpha": self.alpha,
+            "beta": self.beta,
+        }
 
     @property
     def mean(self) -> float:
@@ -3146,11 +3329,28 @@ class PearsonVI:
         self.alpha2 = alpha2
         self.beta = beta
 
-    def __repr__(self):
-        return (
-            f"PearsonVI(alpha1={self.alpha1}, alpha2={self.alpha2}, "
-            + f"beta={self.beta})"
+    def __repr__(self) -> str:
+        """Return the class name and constructor parameters as a string."""
+        params = ", ".join(
+            f"{name}={value}" for name, value in self.get_params().items()
         )
+        return f"{type(self).__name__}({params})"
+
+    def get_params(self) -> dict[str, float]:
+        """
+        Return distribution parameters using constructor argument names.
+
+        Returns
+        -------
+        dict[str, float]
+            Parameters keyed by their constructor argument names. Excludes
+            the random seed and random number generator state.
+        """
+        return {
+            "alpha1": self.alpha1,
+            "alpha2": self.alpha2,
+            "beta": self.beta,
+        }
 
     @property
     def mean(self) -> float:
@@ -3301,12 +3501,28 @@ class ErlangK:
         self.theta = theta
         self.location = location
 
-    def __repr__(self):
-        if self.location == 0.0:
-            return f"ErlangK(k={self.k}, theta={self.theta})"
-        return (
-            f"ErlangK(k={self.k}, theta={self.theta}, " + f"location={self.location})"
+    def __repr__(self) -> str:
+        """Return the class name and constructor parameters as a string."""
+        params = ", ".join(
+            f"{name}={value}" for name, value in self.get_params().items()
         )
+        return f"{type(self).__name__}({params})"
+
+    def get_params(self) -> dict[str, float]:
+        """
+        Return distribution parameters using constructor argument names.
+
+        Returns
+        -------
+        dict[str, float]
+            Parameters keyed by their constructor argument names. Excludes
+            the random seed and random number generator state.
+        """
+        return {
+            "k": self.k,
+            "theta": self.theta,
+            "location": self.location,
+        }
 
     @property
     def mean(self) -> float:
@@ -3420,8 +3636,26 @@ class Poisson:
         self.rng = np.random.default_rng(random_seed)
         self.rate = rate
 
-    def __repr__(self):
-        return f"Poisson(rate={self.rate})"
+    def __repr__(self) -> str:
+        """Return the class name and constructor parameters as a string."""
+        params = ", ".join(
+            f"{name}={value}" for name, value in self.get_params().items()
+        )
+        return f"{type(self).__name__}({params})"
+
+    def get_params(self) -> dict[str, float]:
+        """
+        Return distribution parameters using constructor argument names.
+
+        Returns
+        -------
+        dict[str, float]
+            Parameters keyed by their constructor argument names. Excludes
+            the random seed and random number generator state.
+        """
+        return {
+            "rate": self.rate,
+        }
 
     def sample(
         self, size: int | tuple[int, ...] | None = None
@@ -3454,7 +3688,9 @@ class Poisson:
         Parameters
         ----------
         data : ArrayLike
-            Observed data to fit distribution to.
+            Observed data to fit distribution to. These are expected to be
+            observed counts in an interval (as Poisson is fit with rate
+            which is mean number of events in a time period).
         random_seed : Optional[Union[int, SeedSequence]], default=None
             A random seed or SeedSequence to reproduce samples. If None, a
             unique sample sequence is generated.
